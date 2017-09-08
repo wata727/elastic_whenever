@@ -1,5 +1,16 @@
-require "elastic_whenever/version"
+require "optparse"
+require "aws-sdk-ecs"
+require "aws-sdk-cloudwatchevents"
+require "aws-sdk-iam"
+require "chronic"
 
-module ElasticWhenever
-  # Your code goes here...
-end
+require "elastic_whenever/version"
+require "elastic_whenever/cli"
+require "elastic_whenever/option"
+require "elastic_whenever/schedule"
+require "elastic_whenever/task"
+require "elastic_whenever/task/cluster"
+require "elastic_whenever/task/definition"
+require "elastic_whenever/task/role"
+require "elastic_whenever/task/rule"
+require "elastic_whenever/task/target"
