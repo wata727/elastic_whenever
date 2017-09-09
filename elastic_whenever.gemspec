@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Kazuma Watanabe"]
   spec.email         = ["watassbass@gmail.com"]
 
-  spec.summary       = %q{Manage ECS scheduled tasks like Whenever}
+  spec.summary       = %q{Manage ECS Scheduled Tasks like Whenever}
   spec.description   = %q{Manage ECS Scheduled Tasks like Whenever}
   spec.homepage      = "https://github.com/wata727/elastic_whenever"
 

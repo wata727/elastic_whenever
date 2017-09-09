@@ -1,5 +1,8 @@
 module ElasticWhenever
   class CLI
+    SUCCESS_EXIT_CODE = 0
+    ERROR_EXIT_CODE = 1
+
     class << self
       def run(args)
         option = Option.new(args)
@@ -11,13 +14,22 @@ module ElasticWhenever
         when Option::PRINT_VERSION_MODE
           print_version
         end
+
+        SUCCESS_EXIT_CODE
+      rescue Option::InvalidOptionException,
+        Schedule::InvalidScheduleException => exn
+        Logger.instance.fail(exn.message)
+        ERROR_EXIT_CODE
       end
+
+      private
 
       def update_crontab(option)
         schedule = Schedule.new(option.schedule_file)
         option.variables.each do |var|
           schedule.set(var[:key], var[:value])
         end
+        schedule.validate!
 
         cluster = Task::Cluster.new(schedule.cluster)
         definition = Task::Definition.new(schedule.task_definition)

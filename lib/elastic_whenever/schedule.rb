@@ -5,6 +5,8 @@ module ElasticWhenever
     attr_reader :task_definition
     attr_reader :container
 
+    class InvalidScheduleException < StandardError; end
+
     def initialize(file, environment: "production")
       @environment = environment
       @tasks = []
@@ -25,9 +27,9 @@ module ElasticWhenever
     end
 
     def validate!
-      raise "You must specify cluster name" unless cluster
-      raise "You must specify task definition" unless task_definition
-      raise "You must specify container name" unless container
+      raise InvalidScheduleException.new("You must set cluster") unless cluster
+      raise InvalidScheduleException.new("You must set task definition") unless task_definition
+      raise InvalidScheduleException.new("You must set container") unless container
     end
   end
 end

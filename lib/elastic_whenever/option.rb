@@ -1,17 +1,20 @@
 module ElasticWhenever
   class Option
-    UPDATE_CRONTAB_MODE = 1
-    CLEAR_CRONTAB_MODE = 2
-    PRINT_VERSION_MODE = 3
+    DRYRUN_UPDATE_CRONTAB_MODE = 1
+    UPDATE_CRONTAB_MODE = 2
+    CLEAR_CRONTAB_MODE = 3
+    PRINT_VERSION_MODE = 4
 
     attr_reader :identifier
     attr_reader :mode
     attr_reader :variables
     attr_reader :schedule_file
 
+    class InvalidOptionException < StandardError; end
+
     def initialize(args)
       @identifier = 'elastic-whenever'
-      @mode = nil
+      @mode = DRYRUN_UPDATE_CRONTAB_MODE
       @variables = []
       @schedule_file = 'config/schedule.rb'
 
@@ -25,9 +28,13 @@ module ElasticWhenever
           @mode = CLEAR_CRONTAB_MODE
         end
         opts.on('-s' ,'--set [variables]', "Example: --set 'environment=staging&cluster=ecs-test'") do |set|
+          raise InvalidOptionException.new("Set must not be empty") unless set
           pairs = set.split('&')
           pairs.each do |pair|
-            next unless pair.include?('=')
+            unless pair.include?('=')
+              Logger.instance.warn("Ignore variable set: #{pair}")
+              next
+            end
             key, value = pair.split('=')
             @variables = { key: key, value: value }
           end
@@ -39,6 +46,12 @@ module ElasticWhenever
           @mode = PRINT_VERSION_MODE
         end
       end.parse(args)
+
+      validate!
+    end
+
+    def validate!
+      raise InvalidOptionException.new("Can't find file: #{schedule_file}") unless File.exists?(schedule_file)
     end
   end
 end
