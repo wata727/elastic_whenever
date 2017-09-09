@@ -6,13 +6,11 @@ module ElasticWhenever
         case option.mode
         when Option::UPDATE_CRONTAB_MODE
           update_crontab(option)
+        when Option::CLEAR_CRONTAB_MODE
+          clear_crontab(option)
         when Option::PRINT_VERSION_MODE
-          version
+          print_version
         end
-      end
-
-      def version
-        puts "Elastic Whenever v#{ElasticWhenever::VERSION}"
       end
 
       def update_crontab(option)
@@ -29,6 +27,7 @@ module ElasticWhenever
           role.create
         end
 
+        clear_crontab(option)
         schedule.tasks.each do |task|
           rule = Task::Rule.new(task, option).create
           Task::Target.new(
@@ -40,6 +39,14 @@ module ElasticWhenever
             role: role,
           ).create
         end
+      end
+
+      def clear_crontab(option)
+        Task::Rule.delete(option.identifier)
+      end
+
+      def print_version
+        puts "Elastic Whenever v#{ElasticWhenever::VERSION}"
       end
     end
   end

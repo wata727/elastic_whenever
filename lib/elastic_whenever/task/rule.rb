@@ -3,6 +3,14 @@ module ElasticWhenever
     class Rule
       attr_reader :name
 
+      def self.delete(identifier)
+        client = Aws::CloudWatchEvents::Client.new
+        client.list_rules(name_prefix: identifier).rules.each do |rule|
+          client.remove_targets(rule: rule.name, ids: [rule.name])
+          client.delete_rule(name: rule.name)
+        end
+      end
+
       def initialize(task, option)
         @name = rule_name(option.identifier, task.commands)
         @expression = schedule_expression(task.frequency, task.options)
