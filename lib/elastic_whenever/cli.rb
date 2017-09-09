@@ -14,7 +14,7 @@ module ElasticWhenever
       end
 
       def update_crontab(option)
-        schedule = Schedule.new("config/schedule.rb")
+        schedule = Schedule.new(option.schedule_file)
         option.variables.each do |var|
           schedule.set(var[:key], var[:value])
         end

@@ -7,22 +7,24 @@ module ElasticWhenever
     attr_reader :identifier
     attr_reader :mode
     attr_reader :variables
+    attr_reader :schedule_file
 
     def initialize(args)
       @identifier = 'elastic-whenever'
       @mode = nil
       @variables = []
+      @schedule_file = 'config/schedule.rb'
 
       OptionParser.new do |opts|
-        opts.on('-i', '--update-crontab', 'Default: full path to schedule.rb file') do |identifier|
+        opts.on('-i', '--update-crontab [identifier]', 'Default: elastic-whenever') do |identifier|
           @identifier = identifier if identifier.is_a? String
           @mode = UPDATE_CRONTAB_MODE
         end
-        opts.on('-c', '--clear-crontab') do |identifier|
+        opts.on('-c', '--clear-crontab [identifier]', 'Default: elastic-whenever') do |identifier|
           @identifier = identifier if identifier.is_a? String
           @mode = CLEAR_CRONTAB_MODE
         end
-        opts.on('-s' ,'--set', "Example: --set 'environment=staging&path=/my/sweet/path'") do |set|
+        opts.on('-s' ,'--set [variables]', "Example: --set 'environment=staging&cluster=ecs-test'") do |set|
           pairs = set.split('&')
           pairs.each do |pair|
             next unless pair.include?('=')
@@ -30,7 +32,10 @@ module ElasticWhenever
             @variables = { key: key, value: value }
           end
         end
-        opts.on('-v', '--version') do
+        opts.on('-f', '--load-file [schedule file]', 'Default: config/schedule.rb') do |file|
+          @schedule_file = file
+        end
+        opts.on('-v', '--version', 'Print version') do
           @mode = PRINT_VERSION_MODE
         end
       end.parse(args)
