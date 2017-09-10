@@ -2,6 +2,7 @@ module ElasticWhenever
   class Task
     class Rule
       attr_reader :name
+      attr_reader :expression
 
       def self.delete(identifier)
         client = Aws::CloudWatchEvents::Client.new
@@ -55,7 +56,6 @@ module ElasticWhenever
         end
       end
 
-      attr_reader :expression
       attr_reader :client
       attr_reader :rule
     end

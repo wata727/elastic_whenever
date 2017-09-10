@@ -8,6 +8,10 @@ module ElasticWhenever
         )
       end
 
+      def name
+        resp&.clusters&.first&.cluster_name
+      end
+
       def arn
         resp&.clusters&.first&.cluster_arn
       end

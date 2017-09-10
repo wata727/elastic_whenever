@@ -9,5 +9,13 @@ module ElasticWhenever
     def warn(message)
       puts "[warn] #{message}"
     end
+
+    def log(event, message)
+      puts "[#{event}] #{message}"
+    end
+
+    def message(message)
+      puts "## [message] #{message}"
+    end
   end
 end

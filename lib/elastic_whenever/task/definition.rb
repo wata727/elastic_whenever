@@ -8,6 +8,11 @@ module ElasticWhenever
         )
       end
 
+      def name
+        definition = resp&.task_definition
+        "#{definition.family}:#{definition.revision}" if definition
+      end
+
       def arn
         resp&.task_definition&.task_definition_arn
       end

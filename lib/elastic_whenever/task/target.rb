@@ -1,6 +1,11 @@
 module ElasticWhenever
   class Task
     class Target
+      attr_reader :cluster
+      attr_reader :definition
+      attr_reader :container
+      attr_reader :task
+
       def initialize(cluster:, definition:, container:, task:, rule:, role:)
         @cluster = cluster
         @definition = definition
@@ -42,10 +47,6 @@ module ElasticWhenever
         }.to_json
       end
 
-      attr_reader :cluster
-      attr_reader :definition
-      attr_reader :container
-      attr_reader :task
       attr_reader :rule
       attr_reader :role
       attr_reader :client
