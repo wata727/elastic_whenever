@@ -14,26 +14,25 @@ module ElasticWhenever
     class InvalidOptionException < StandardError; end
 
     def initialize(args)
-      @identifier = 'elastic-whenever'
+      @identifier = nil
       @mode = DRYRUN_UPDATE_CRONTAB_MODE
       @variables = []
       @schedule_file = 'config/schedule.rb'
 
       OptionParser.new do |opts|
-        opts.on('-i', '--update-crontab [identifier]', 'Default: elastic-whenever') do |identifier|
-          @identifier = identifier if identifier.is_a? String
+        opts.on('-i', '--update identifier', 'Clear and create scheduled tasks by schedule file') do |identifier|
+          @identifier = identifier
           @mode = UPDATE_CRONTAB_MODE
         end
-        opts.on('-c', '--clear-crontab [identifier]', 'Default: elastic-whenever') do |identifier|
-          @identifier = identifier if identifier.is_a? String
+        opts.on('-c', '--clear identifier', 'Clear scheduled tasks') do |identifier|
+          @identifier = identifier
           @mode = CLEAR_CRONTAB_MODE
         end
-        opts.on('-l', '--list-crontab [identifier]', 'Default: elastic-whenever') do |identifier|
-          @identifier = identifier if identifier.is_a? String
+        opts.on('-l', '--list identifier', 'List scheduled tasks') do |identifier|
+          @identifier = identifier
           @mode = LIST_CRONTAB_MODE
         end
-        opts.on('-s' ,'--set [variables]', "Example: --set 'environment=staging&cluster=ecs-test'") do |set|
-          raise InvalidOptionException.new("Set must not be empty") unless set
+        opts.on('-s' ,'--set variables', "Example: --set 'environment=staging&cluster=ecs-test'") do |set|
           pairs = set.split('&')
           pairs.each do |pair|
             unless pair.include?('=')
@@ -44,7 +43,7 @@ module ElasticWhenever
             @variables = { key: key, value: value }
           end
         end
-        opts.on('-f', '--load-file [schedule file]', 'Default: config/schedule.rb') do |file|
+        opts.on('-f', '--file schedule_file', 'Default: config/schedule.rb') do |file|
           @schedule_file = file
         end
         opts.on('-v', '--version', 'Print version') do
