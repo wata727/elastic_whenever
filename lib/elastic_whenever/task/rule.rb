@@ -4,21 +4,27 @@ module ElasticWhenever
       attr_reader :name
       attr_reader :expression
 
-      def self.delete(identifier)
+      def self.fetch(identifier)
         client = Aws::CloudWatchEvents::Client.new
-        client.list_rules(name_prefix: identifier).rules.each do |rule|
-          client.remove_targets(rule: rule.name, ids: [rule.name])
-          client.delete_rule(name: rule.name)
+        client.list_rules(name_prefix: identifier).rules.map do |rule|
+          self.new(
+            name: rule.name,
+            expression: rule.schedule_expression,
+          )
         end
       end
 
-      def initialize(task, option)
-        @name = rule_name(option.identifier, task.commands)
-        @expression = schedule_expression(task.frequency, task.options)
+      def self.convert(task, option)
+        self.new(
+          name: rule_name(option.identifier, task.commands),
+          expression: schedule_expression(task.frequency, task.options)
+        )
+      end
+
+      def initialize(name:, expression:)
+        @name = name
+        @expression = expression
         @client = Aws::CloudWatchEvents::Client.new
-        @rule = client.describe_rule(name: name)
-      rescue Aws::CloudWatchEvents::Errors::ResourceNotFoundException
-        @rule = nil
       end
 
       def create
@@ -27,20 +33,20 @@ module ElasticWhenever
           schedule_expression: expression,
           state: "ENABLED",
         )
-        @rule = client.describe_rule(name: name)
       end
 
-      def exists?
-        !!rule
+      def delete
+        client.remove_targets(rule: name, ids: [name])
+        client.delete_rule(name: name)
       end
 
       private
 
-      def rule_name(identifier, commands)
+      def self.rule_name(identifier, commands)
         "#{identifier}_#{Digest::SHA1.hexdigest(commands.join("-"))}"
       end
 
-      def schedule_expression(frequency, options)
+      def self.schedule_expression(frequency, options)
         time = Chronic.parse(options[:at]) || Time.new(2017, 9, 9, 0, 0, 0)
 
         case frequency
@@ -57,7 +63,6 @@ module ElasticWhenever
       end
 
       attr_reader :client
-      attr_reader :rule
     end
   end
 end

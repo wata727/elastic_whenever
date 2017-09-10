@@ -3,24 +3,23 @@ module ElasticWhenever
     class Definition
       def initialize(family)
         @client = Aws::ECS::Client.new
-        @resp = client.describe_task_definition(
+        @definition = client.describe_task_definition(
           task_definition: family
-        )
+        ).task_definition
       end
 
       def name
-        definition = resp&.task_definition
         "#{definition.family}:#{definition.revision}" if definition
       end
 
       def arn
-        resp&.task_definition&.task_definition_arn
+        definition&.task_definition_arn
       end
 
       private
 
       attr_reader :client
-      attr_reader :resp
+      attr_reader :definition
     end
   end
 end

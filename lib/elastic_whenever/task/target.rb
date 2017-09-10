@@ -4,13 +4,30 @@ module ElasticWhenever
       attr_reader :cluster
       attr_reader :definition
       attr_reader :container
-      attr_reader :task
+      attr_reader :commands
 
-      def initialize(cluster:, definition:, container:, task:, rule:, role:)
+      def self.fetch(rule)
+        client = Aws::CloudWatchEvents::Client.new
+        target = client.list_targets_by_rule(rule: rule.name).targets.first
+        # arn:aws:ecs:us-east-1:<aws_account_id>:task-definition/wordpress:3
+        definition_name = target.ecs_parameters.task_definition_arn.match(/arn:aws:ecs:.+:.+:task-definition\/(.+)/)[0]
+        input = JSON.parse(target.input, symbolize_names: true)
+
+        self.new(
+          cluster: Cluster.new(arn: target.arn),
+          definition: Definition.new(definition_name),
+          container: input[:containerOverrides].first[:name],
+          commands: input[:containerOverrides].first[:command],
+          rule: rule,
+          role: Role.new
+        )
+      end
+
+      def initialize(cluster:, definition:, container:, commands:, rule:, role:)
         @cluster = cluster
         @definition = definition
         @container = container
-        @task = task
+        @commands = commands
         @rule = rule
         @role = role
         @client = Aws::CloudWatchEvents::Client.new
@@ -23,7 +40,7 @@ module ElasticWhenever
             {
               id: rule.name,
               arn: cluster.arn,
-              input: input_json(container, task.commands),
+              input: input_json(container, commands),
               role_arn: role.arn,
               ecs_parameters: {
                 task_definition_arn: definition.arn,

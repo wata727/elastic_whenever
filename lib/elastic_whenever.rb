@@ -4,6 +4,7 @@ require "aws-sdk-cloudwatchevents"
 require "aws-sdk-iam"
 require "chronic"
 require "singleton"
+require "json"
 
 require "elastic_whenever/version"
 require "elastic_whenever/cli"

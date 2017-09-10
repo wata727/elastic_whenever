@@ -17,6 +17,10 @@ module ElasticWhenever
         when Option::CLEAR_CRONTAB_MODE
           clear_crontab(option)
           Logger.instance.log("write", "shceduled tasks")
+        when Option::LIST_CRONTAB_MODE
+          list_crontab(option)
+          Logger.instance.message("Above is your scheduled tasks.")
+          Logger.instance.message("Run `elastic_whenever --help` for more options.")
         when Option::PRINT_VERSION_MODE
           print_version
         end
@@ -37,7 +41,7 @@ module ElasticWhenever
         end
         schedule.validate!
 
-        cluster = Task::Cluster.new(schedule.cluster)
+        cluster = Task::Cluster.new(name: schedule.cluster)
         definition = Task::Definition.new(schedule.task_definition)
 
         role = Task::Role.new
@@ -47,19 +51,18 @@ module ElasticWhenever
 
         clear_crontab(option) unless dry_run
         schedule.tasks.each do |task|
-          rule = Task::Rule.new(task, option)
+          rule = Task::Rule.convert(task, option)
           target = Task::Target.new(
             cluster: cluster,
             definition: definition,
             container: schedule.container,
-            task: task,
+            commands: task.commands,
             rule: rule,
             role: role,
           )
 
           if dry_run
-            puts "#{rule.expression} #{target.cluster.name} #{target.definition.name} #{target.container} #{target.task.commands.join(" ")}"
-            puts
+            print_task(rule, target)
           else
             rule.create
             target.create
@@ -68,11 +71,23 @@ module ElasticWhenever
       end
 
       def clear_crontab(option)
-        Task::Rule.delete(option.identifier)
+        Task::Rule.fetch(option.identifier).each(&:delete)
+      end
+
+      def list_crontab(option)
+        Task::Rule.fetch(option.identifier).each do |rule|
+          target = Task::Target.fetch(rule)
+          print_task(rule, target)
+        end
       end
 
       def print_version
         puts "Elastic Whenever v#{ElasticWhenever::VERSION}"
+      end
+
+      def print_task(rule, target)
+        puts "#{rule.expression} #{target.cluster.name} #{target.definition.name} #{target.container} #{target.commands.join(" ")}"
+        puts
       end
     end
   end

@@ -3,7 +3,8 @@ module ElasticWhenever
     DRYRUN_UPDATE_CRONTAB_MODE = 1
     UPDATE_CRONTAB_MODE = 2
     CLEAR_CRONTAB_MODE = 3
-    PRINT_VERSION_MODE = 4
+    LIST_CRONTAB_MODE = 4
+    PRINT_VERSION_MODE = 5
 
     attr_reader :identifier
     attr_reader :mode
@@ -26,6 +27,10 @@ module ElasticWhenever
         opts.on('-c', '--clear-crontab [identifier]', 'Default: elastic-whenever') do |identifier|
           @identifier = identifier if identifier.is_a? String
           @mode = CLEAR_CRONTAB_MODE
+        end
+        opts.on('-l', '--list-crontab [identifier]', 'Default: elastic-whenever') do |identifier|
+          @identifier = identifier if identifier.is_a? String
+          @mode = LIST_CRONTAB_MODE
         end
         opts.on('-s' ,'--set [variables]', "Example: --set 'environment=staging&cluster=ecs-test'") do |set|
           raise InvalidOptionException.new("Set must not be empty") unless set
