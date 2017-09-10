@@ -28,7 +28,9 @@ module ElasticWhenever
         SUCCESS_EXIT_CODE
       rescue OptionParser::MissingArgument,
         Option::InvalidOptionException,
-        Schedule::InvalidScheduleException => exn
+        Schedule::InvalidScheduleException,
+        Aws::Errors::MissingCredentialsError => exn
+
         Logger.instance.fail(exn.message)
         ERROR_EXIT_CODE
       end
@@ -42,18 +44,19 @@ module ElasticWhenever
         end
         schedule.validate!
 
-        cluster = Task::Cluster.new(name: schedule.cluster)
-        definition = Task::Definition.new(schedule.task_definition)
+        cluster = Task::Cluster.new(option, name: schedule.cluster)
+        definition = Task::Definition.new(option, schedule.task_definition)
 
-        role = Task::Role.new
+        role = Task::Role.new(option)
         if !role.exists? && !dry_run
           role.create
         end
 
         clear_tasks(option) unless dry_run
         schedule.tasks.each do |task|
-          rule = Task::Rule.convert(task, option)
+          rule = Task::Rule.convert(option, task)
           target = Task::Target.new(
+            option,
             cluster: cluster,
             definition: definition,
             container: schedule.container,
@@ -72,12 +75,12 @@ module ElasticWhenever
       end
 
       def clear_tasks(option)
-        Task::Rule.fetch(option.identifier).each(&:delete)
+        Task::Rule.fetch(option).each(&:delete)
       end
 
       def list_tasks(option)
-        Task::Rule.fetch(option.identifier).each do |rule|
-          target = Task::Target.fetch(rule)
+        Task::Rule.fetch(option).each do |rule|
+          target = Task::Target.fetch(option, rule)
           print_task(rule, target)
         end
       end

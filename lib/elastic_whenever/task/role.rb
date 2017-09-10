@@ -3,8 +3,8 @@ module ElasticWhenever
     class Role
       NAME = "ecsEventsRole"
 
-      def initialize
-        client = Aws::IAM::Client.new
+      def initialize(option)
+        client = Aws::IAM::Client.new(option.aws_config)
         @resource = Aws::IAM::Resource.new(client: client)
         @role = resource.role(NAME)
       end

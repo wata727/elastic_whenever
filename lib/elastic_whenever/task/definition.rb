@@ -1,8 +1,8 @@
 module ElasticWhenever
   class Task
     class Definition
-      def initialize(family)
-        @client = Aws::ECS::Client.new
+      def initialize(option, family)
+        @client = Aws::ECS::Client.new(option.aws_config)
         @definition = client.describe_task_definition(
           task_definition: family
         ).task_definition

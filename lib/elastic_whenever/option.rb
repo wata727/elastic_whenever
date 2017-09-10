@@ -18,6 +18,10 @@ module ElasticWhenever
       @mode = DRYRUN_MODE
       @variables = []
       @schedule_file = 'config/schedule.rb'
+      @profile = nil
+      @access_key = nil
+      @secret_key = nil
+      @region = nil
 
       OptionParser.new do |opts|
         opts.on('-i', '--update identifier', 'Clear and create scheduled tasks by schedule file') do |identifier|
@@ -46,16 +50,46 @@ module ElasticWhenever
         opts.on('-f', '--file schedule_file', 'Default: config/schedule.rb') do |file|
           @schedule_file = file
         end
+        opts.on('--profile profile_name', 'AWS shared profile name') do |profile|
+          @profile = profile
+        end
+        opts.on('--access-key aws_access_key_id', 'AWS access key ID') do |key|
+          @access_key = key
+        end
+        opts.on('--secret-key aws_secret_access_key', 'AWS secret access key') do |key|
+          @secret_key = key
+        end
+        opts.on('--region region', 'AWS region') do |region|
+          @region = region
+        end
         opts.on('-v', '--version', 'Print version') do
           @mode = PRINT_VERSION_MODE
         end
       end.parse(args)
 
+      @credentials = if profile
+                       Aws::SharedCredentials.new(profile_name: profile)
+                     elsif access_key && secret_key
+                       Aws::Credentials.new(access_key, secret_key)
+                     end
+
       validate!
+    end
+
+    def aws_config
+      { credentials: credentials, region: region }.delete_if { |_k, v| v.nil? }
     end
 
     def validate!
       raise InvalidOptionException.new("Can't find file: #{schedule_file}") unless File.exists?(schedule_file)
     end
+
+    private
+
+    attr_reader :profile
+    attr_reader :access_key
+    attr_reader :secret_key
+    attr_reader :region
+    attr_reader :credentials
   end
 end

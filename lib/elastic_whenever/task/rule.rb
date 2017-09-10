@@ -4,27 +4,29 @@ module ElasticWhenever
       attr_reader :name
       attr_reader :expression
 
-      def self.fetch(identifier)
-        client = Aws::CloudWatchEvents::Client.new
-        client.list_rules(name_prefix: identifier).rules.map do |rule|
+      def self.fetch(option)
+        client = Aws::CloudWatchEvents::Client.new(option.aws_config)
+        client.list_rules(name_prefix: option.identifier).rules.map do |rule|
           self.new(
+            option,
             name: rule.name,
             expression: rule.schedule_expression,
           )
         end
       end
 
-      def self.convert(task, option)
+      def self.convert(option, task)
         self.new(
+          option,
           name: rule_name(option.identifier, task.commands),
           expression: schedule_expression(task.frequency, task.options)
         )
       end
 
-      def initialize(name:, expression:)
+      def initialize(option, name:, expression:)
         @name = name
         @expression = expression
-        @client = Aws::CloudWatchEvents::Client.new
+        @client = Aws::CloudWatchEvents::Client.new(option.aws_config)
       end
 
       def create
