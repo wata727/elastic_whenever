@@ -44,7 +44,7 @@ module ElasticWhenever
               next
             end
             key, value = pair.split('=')
-            @variables = { key: key, value: value }
+            @variables << { key: key, value: value }
           end
         end
         opts.on('-f', '--file schedule_file', 'Default: config/schedule.rb') do |file|
@@ -72,8 +72,6 @@ module ElasticWhenever
                      elsif access_key && secret_key
                        Aws::Credentials.new(access_key, secret_key)
                      end
-
-      validate!
     end
 
     def aws_config

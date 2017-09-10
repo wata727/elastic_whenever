@@ -8,10 +8,12 @@ module ElasticWhenever
         option = Option.new(args)
         case option.mode
         when Option::DRYRUN_MODE
+          option.validate!
           update_tasks(option, dry_run: true)
           Logger.instance.message("Above is your schedule file converted to scheduled tasks; your scheduled tasks was not updated.")
           Logger.instance.message("Run `elastic_whenever --help' for more options.")
         when Option::UPDATE_MODE
+          option.validate!
           update_tasks(option, dry_run: false)
           Logger.instance.log("write", "scheduled tasks updated")
         when Option::CLEAR_MODE
@@ -44,7 +46,7 @@ module ElasticWhenever
         end
         schedule.validate!
 
-        cluster = Task::Cluster.new(option, name: schedule.cluster)
+        cluster = Task::Cluster.new(option, schedule.cluster)
         definition = Task::Definition.new(option, schedule.task_definition)
         role = Task::Role.new(option)
         if !role.exists? && !dry_run

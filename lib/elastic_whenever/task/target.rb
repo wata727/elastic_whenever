@@ -10,14 +10,12 @@ module ElasticWhenever
         client = Aws::CloudWatchEvents::Client.new(option.aws_config)
         targets = client.list_targets_by_rule(rule: rule.name).targets
         targets.map do |target|
-          # arn:aws:ecs:us-east-1:<aws_account_id>:task-definition/wordpress:3
-          definition_name = target.ecs_parameters.task_definition_arn.match(/arn:aws:ecs:.+:.+:task-definition\/(.+)/)[0]
           input = JSON.parse(target.input, symbolize_names: true)
 
           self.new(
             option,
-            cluster: Cluster.new(option, arn: target.arn),
-            definition: Definition.new(option, definition_name),
+            cluster: Cluster.new(option, target.arn),
+            definition: Definition.new(option, target.ecs_parameters.task_definition_arn),
             container: input[:containerOverrides].first[:name],
             commands: input[:containerOverrides].first[:command],
             rule: rule,

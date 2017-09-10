@@ -3,11 +3,8 @@ module ElasticWhenever
     class Cluster
       class InvalidInputException < StandardError; end
 
-      def initialize(option, name: nil, arn: nil)
-        raise InvalidInputException.new("Either name or arn must be specified") if !name && !arn
+      def initialize(option, name)
         @client = Aws::ECS::Client.new(option.aws_config)
-        # "arn:aws:ecs:us-east-1:<aws_account_id>:cluster/default"
-        name = arn.match(/arn:aws:ecs:.+:.+:cluster\/(.+)/)[0] if arn
         @cluster = client.describe_clusters(
           clusters: [name]
         ).clusters.first
