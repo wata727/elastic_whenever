@@ -1,8 +1,6 @@
-# ElasticWhenever
+# Elastic Whenever
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/elastic_whenever`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+Manage ECS scheduled tasks like whenever gem.
 
 ## Installation
 
@@ -22,7 +20,36 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+You can use it almost like whenever :)
+
+```
+$ elastic_whenever --help
+Usage: elastic_whenever [options]
+    -i, --update identifier          Clear and create scheduled tasks by schedule file
+    -c, --clear identifier           Clear scheduled tasks
+    -l, --list identifier            List scheduled tasks
+    -s, --set variables              Example: --set 'environment=staging&cluster=ecs-test'
+    -f, --file schedule_file         Default: config/schedule.rb
+        --profile profile_name       AWS shared profile name
+        --access-key aws_access_key_id
+                                     AWS access key ID
+        --secret-key aws_secret_access_key
+                                     AWS secret access key
+        --region region              AWS region
+    -v, --version                    Print version
+```
+
+However, please be aware that you must specify an identifier.
+
+NOTE: Currently, it supports only the syntax of whenever partially. We recommend to check what happens beforehand with the `elastic_whenever` command.
+
+```
+$ elastic_whenever
+cron(0 3 * * ? *) ecs-test example:2 cron bundle exec rake hoge:run
+
+## [message] Above is your schedule file converted to scheduled tasks; your scheduled tasks was not updated.
+## [message] Run `elastic_whenever --help' for more options.
+```
 
 ## Development
 
@@ -32,4 +59,4 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/elastic_whenever.
+Bug reports and pull requests are welcome on GitHub at https://github.com/wata727/elastic_whenever.
