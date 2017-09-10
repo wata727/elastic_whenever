@@ -38,14 +38,15 @@ module ElasticWhenever
       end
 
       def delete
-        client.remove_targets(rule: name, ids: [name])
+        targets = client.list_targets_by_rule(rule: name).targets
+        client.remove_targets(rule: name, ids: targets.map(&:id))
         client.delete_rule(name: name)
       end
 
       private
 
       def self.rule_name(identifier, commands)
-        "#{identifier}_#{Digest::SHA1.hexdigest(commands.join("-"))}"
+        "#{identifier}_#{Digest::SHA1.hexdigest(commands.map { |command| command.join("-") }.join("-"))}"
       end
 
       def self.schedule_expression(frequency, options)

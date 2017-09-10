@@ -46,7 +46,6 @@ module ElasticWhenever
 
         cluster = Task::Cluster.new(option, name: schedule.cluster)
         definition = Task::Definition.new(option, schedule.task_definition)
-
         role = Task::Role.new(option)
         if !role.exists? && !dry_run
           role.create
@@ -55,21 +54,23 @@ module ElasticWhenever
         clear_tasks(option) unless dry_run
         schedule.tasks.each do |task|
           rule = Task::Rule.convert(option, task)
-          target = Task::Target.new(
-            option,
-            cluster: cluster,
-            definition: definition,
-            container: schedule.container,
-            commands: task.commands,
-            rule: rule,
-            role: role,
-          )
+          targets = task.commands.map do |command|
+            Task::Target.new(
+              option,
+              cluster: cluster,
+              definition: definition,
+              container: schedule.container,
+              commands: command,
+              rule: rule,
+              role: role,
+            )
+          end
 
           if dry_run
-            print_task(rule, target)
+            print_task(rule, targets)
           else
             rule.create
-            target.create
+            targets.each(&:create)
           end
         end
       end
@@ -89,9 +90,11 @@ module ElasticWhenever
         puts "Elastic Whenever v#{ElasticWhenever::VERSION}"
       end
 
-      def print_task(rule, target)
-        puts "#{rule.expression} #{target.cluster.name} #{target.definition.name} #{target.container} #{target.commands.join(" ")}"
-        puts
+      def print_task(rule, targets)
+        targets.each do |target|
+          puts "#{rule.expression} #{target.cluster.name} #{target.definition.name} #{target.container} #{target.commands.join(" ")}"
+          puts
+        end
       end
     end
   end

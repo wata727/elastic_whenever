@@ -4,14 +4,15 @@ module ElasticWhenever
     attr_reader :frequency
     attr_reader :options
 
-    def initialize(environment, frequency, options)
+    def initialize(environment, frequency, options = {})
       @environment = environment
       @frequency = frequency
       @options = options
+      @commands = []
     end
 
     def runner(src)
-      @commands = [
+      @commands << [
         "bundle",
         "exec",
         "bin/rails",
@@ -23,7 +24,7 @@ module ElasticWhenever
     end
 
     def rake(task)
-      @commands = [
+      @commands << [
         "bundle",
         "exec",
         "rake",

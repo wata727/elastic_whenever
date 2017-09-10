@@ -8,20 +8,22 @@ module ElasticWhenever
 
       def self.fetch(option, rule)
         client = Aws::CloudWatchEvents::Client.new(option.aws_config)
-        target = client.list_targets_by_rule(rule: rule.name).targets.first
-        # arn:aws:ecs:us-east-1:<aws_account_id>:task-definition/wordpress:3
-        definition_name = target.ecs_parameters.task_definition_arn.match(/arn:aws:ecs:.+:.+:task-definition\/(.+)/)[0]
-        input = JSON.parse(target.input, symbolize_names: true)
+        targets = client.list_targets_by_rule(rule: rule.name).targets
+        targets.map do |target|
+          # arn:aws:ecs:us-east-1:<aws_account_id>:task-definition/wordpress:3
+          definition_name = target.ecs_parameters.task_definition_arn.match(/arn:aws:ecs:.+:.+:task-definition\/(.+)/)[0]
+          input = JSON.parse(target.input, symbolize_names: true)
 
-        self.new(
-          option,
-          cluster: Cluster.new(option, arn: target.arn),
-          definition: Definition.new(option, definition_name),
-          container: input[:containerOverrides].first[:name],
-          commands: input[:containerOverrides].first[:command],
-          rule: rule,
-          role: Role.new(option)
-        )
+          self.new(
+            option,
+            cluster: Cluster.new(option, arn: target.arn),
+            definition: Definition.new(option, definition_name),
+            container: input[:containerOverrides].first[:name],
+            commands: input[:containerOverrides].first[:command],
+            rule: rule,
+            role: Role.new(option)
+          )
+        end
       end
 
       def initialize(option, cluster:, definition:, container:, commands:, rule:, role:)
@@ -39,7 +41,7 @@ module ElasticWhenever
           rule: rule.name,
           targets: [
             {
-              id: rule.name,
+              id: Digest::SHA1.hexdigest(commands.join("-")),
               arn: cluster.arn,
               input: input_json(container, commands),
               role_arn: role.arn,
