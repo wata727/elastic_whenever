@@ -7,18 +7,18 @@ module ElasticWhenever
       def run(args)
         option = Option.new(args)
         case option.mode
-        when Option::DRYRUN_UPDATE_CRONTAB_MODE
-          update_crontab(option, dry_run: true)
+        when Option::DRYRUN_MODE
+          update_tasks(option, dry_run: true)
           Logger.instance.message("Above is your schedule file converted to scheduled tasks; your scheduled tasks was not updated.")
           Logger.instance.message("Run `elastic_whenever --help' for more options.")
-        when Option::UPDATE_CRONTAB_MODE
-          update_crontab(option, dry_run: false)
+        when Option::UPDATE_MODE
+          update_tasks(option, dry_run: false)
           Logger.instance.log("write", "scheduled tasks updated")
-        when Option::CLEAR_CRONTAB_MODE
-          clear_crontab(option)
-          Logger.instance.log("write", "shceduled tasks")
-        when Option::LIST_CRONTAB_MODE
-          list_crontab(option)
+        when Option::CLEAR_MODE
+          clear_tasks(option)
+          Logger.instance.log("write", "shceduled tasks cleared")
+        when Option::LIST_MODE
+          list_tasks(option)
           Logger.instance.message("Above is your scheduled tasks.")
           Logger.instance.message("Run `elastic_whenever --help` for more options.")
         when Option::PRINT_VERSION_MODE
@@ -35,7 +35,7 @@ module ElasticWhenever
 
       private
 
-      def update_crontab(option, dry_run:)
+      def update_tasks(option, dry_run:)
         schedule = Schedule.new(option.schedule_file)
         option.variables.each do |var|
           schedule.set(var[:key], var[:value])
@@ -50,7 +50,7 @@ module ElasticWhenever
           role.create
         end
 
-        clear_crontab(option) unless dry_run
+        clear_tasks(option) unless dry_run
         schedule.tasks.each do |task|
           rule = Task::Rule.convert(task, option)
           target = Task::Target.new(
@@ -71,11 +71,11 @@ module ElasticWhenever
         end
       end
 
-      def clear_crontab(option)
+      def clear_tasks(option)
         Task::Rule.fetch(option.identifier).each(&:delete)
       end
 
-      def list_crontab(option)
+      def list_tasks(option)
         Task::Rule.fetch(option.identifier).each do |rule|
           target = Task::Target.fetch(rule)
           print_task(rule, target)

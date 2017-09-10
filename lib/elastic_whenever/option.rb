@@ -1,9 +1,9 @@
 module ElasticWhenever
   class Option
-    DRYRUN_UPDATE_CRONTAB_MODE = 1
-    UPDATE_CRONTAB_MODE = 2
-    CLEAR_CRONTAB_MODE = 3
-    LIST_CRONTAB_MODE = 4
+    DRYRUN_MODE = 1
+    UPDATE_MODE = 2
+    CLEAR_MODE = 3
+    LIST_MODE = 4
     PRINT_VERSION_MODE = 5
 
     attr_reader :identifier
@@ -15,22 +15,22 @@ module ElasticWhenever
 
     def initialize(args)
       @identifier = nil
-      @mode = DRYRUN_UPDATE_CRONTAB_MODE
+      @mode = DRYRUN_MODE
       @variables = []
       @schedule_file = 'config/schedule.rb'
 
       OptionParser.new do |opts|
         opts.on('-i', '--update identifier', 'Clear and create scheduled tasks by schedule file') do |identifier|
           @identifier = identifier
-          @mode = UPDATE_CRONTAB_MODE
+          @mode = UPDATE_MODE
         end
         opts.on('-c', '--clear identifier', 'Clear scheduled tasks') do |identifier|
           @identifier = identifier
-          @mode = CLEAR_CRONTAB_MODE
+          @mode = CLEAR_MODE
         end
         opts.on('-l', '--list identifier', 'List scheduled tasks') do |identifier|
           @identifier = identifier
-          @mode = LIST_CRONTAB_MODE
+          @mode = LIST_MODE
         end
         opts.on('-s' ,'--set variables', "Example: --set 'environment=staging&cluster=ecs-test'") do |set|
           pairs = set.split('&')
