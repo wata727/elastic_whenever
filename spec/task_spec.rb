@@ -19,7 +19,7 @@ RSpec.describe ElasticWhenever::Task do
   describe "#rake" do
     it "generates rake commands" do
       task.rake("hoge:run")
-      expect(task.commands).to eq([%w(bundle exec rake hoge:run --slient)])
+      expect(task.commands).to eq([%w(bundle exec rake hoge:run --silent)])
     end
   end
 end

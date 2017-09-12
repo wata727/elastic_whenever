@@ -29,7 +29,7 @@ module ElasticWhenever
         "exec",
         "rake",
         task,
-        "--slient"
+        "--silent"
       ]
     end
   end
