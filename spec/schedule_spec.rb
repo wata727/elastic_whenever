@@ -30,7 +30,7 @@ RSpec.describe ElasticWhenever::Schedule do
                                      frequency: "0 0 1 * *",
                                      options: {},
                                      commands: [
-                                       %w(bundle exec rake hoge:run --slient),
+                                       %w(bundle exec rake hoge:run --silent),
                                        %w(bundle exec bin/rails runner -e production Fuga.run)
                                      ]
                                    )
