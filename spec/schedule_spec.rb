@@ -13,11 +13,6 @@ RSpec.describe ElasticWhenever::Schedule do
     end
 
     it "has tasks" do
-      runner_task = ElasticWhenever::Task.new("production", :day, at: "03:00am")
-      runner_task.runner("Hoge.run")
-      rake_task = ElasticWhenever::Task.new("production", "0 0 1 * *")
-      rake_task.rake("hoge:run")
-
       expect(schedule.tasks.count).to eq(2)
       expect(schedule.tasks[0]).to have_attributes(
                                      frequency: :day,
@@ -34,6 +29,14 @@ RSpec.describe ElasticWhenever::Schedule do
                                        %w(bundle exec bin/rails runner -e production Fuga.run)
                                      ]
                                    )
+    end
+
+    context "when use unsupported method" do
+      let(:schedule) { ElasticWhenever::Schedule.new((Pathname(__dir__) + "fixtures/unsupported_schedule.rb").to_s) }
+
+      it "does not have tasks" do
+        expect(schedule.tasks.count).to eq(0)
+      end
     end
   end
 

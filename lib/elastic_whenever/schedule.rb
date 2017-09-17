@@ -31,5 +31,9 @@ module ElasticWhenever
       raise InvalidScheduleException.new("You must set task definition") unless task_definition
       raise InvalidScheduleException.new("You must set container") unless container
     end
+
+    def method_missing(name, *args)
+      Logger.instance.warn("Skipping unsupported method: #{name}")
+    end
   end
 end
