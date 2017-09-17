@@ -39,7 +39,23 @@ Usage: elastic_whenever [options]
     -v, --version                    Print version
 ```
 
-However, please be aware that you must specify an identifier.
+However, please be aware that you must specify an identifier. Also, you must specify the cluster, task definition and container name in schedule file.
+
+```ruby
+set :cluster, 'ecs-test' # ECS cluster name
+set :task_definition, 'oneoff-application:2' # Task definition name, If omit the revision, use the latest revision of family automatically.
+set :container, 'oneoff' # Container name of task definition
+
+every :day, at: '03:00am' do
+  runner 'Hoge.run'
+end
+```
+
+If you do not write it in the schedule file, specify it with arguments.
+
+```
+$ elastic_whenever -i test --set 'environment=staging&cluster=ecs-test&task_definition=oneoff-application:2&container=oneoff'
+```
 
 NOTE: Currently, it supports only the syntax of whenever partially. We recommend to check what happens beforehand with the `elastic_whenever` command.
 
