@@ -32,5 +32,9 @@ module ElasticWhenever
         "--silent"
       ]
     end
+
+    def method_missing(name, *args)
+      Logger.instance.warn("Skipping unsupported method: #{name}")
+    end
   end
 end

@@ -39,7 +39,7 @@ module ElasticWhenever
 
       def delete
         targets = client.list_targets_by_rule(rule: name).targets
-        client.remove_targets(rule: name, ids: targets.map(&:id))
+        client.remove_targets(rule: name, ids: targets.map(&:id)) unless targets.empty?
         client.delete_rule(name: name)
       end
 

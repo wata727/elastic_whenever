@@ -22,4 +22,12 @@ RSpec.describe ElasticWhenever::Task do
       expect(task.commands).to eq([%w(bundle exec rake hoge:run --silent)])
     end
   end
+
+  describe "unsupported method" do
+    it "does not change commands" do
+      expect {
+        task.unsupported("hoge")
+      }.not_to change { task.commands }
+    end
+  end
 end
