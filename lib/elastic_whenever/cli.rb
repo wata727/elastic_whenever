@@ -28,10 +28,15 @@ module ElasticWhenever
         end
 
         SUCCESS_EXIT_CODE
+      rescue Aws::Errors::MissingRegionError
+        Logger.instance.fail("missing region error occurred; please use `--region` option or export `AWS_REGION` environment variable.")
+        ERROR_EXIT_CODE
+      rescue Aws::Errors::MissingCredentialsError
+        Logger.instance.fail("missing credential error occurred; please specify it with arguments, use shared credentials, or export `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variable.")
+        ERROR_EXIT_CODE
       rescue OptionParser::MissingArgument,
         Option::InvalidOptionException,
-        Schedule::InvalidScheduleException,
-        Aws::Errors::MissingCredentialsError => exn
+        Schedule::InvalidScheduleException => exn
 
         Logger.instance.fail(exn.message)
         ERROR_EXIT_CODE
