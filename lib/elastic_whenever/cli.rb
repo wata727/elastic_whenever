@@ -83,8 +83,8 @@ module ElasticWhenever
 
       def list_tasks(option)
         Task::Rule.fetch(option).each do |rule|
-          target = Task::Target.fetch(option, rule)
-          print_task(rule, target)
+          targets = Task::Target.fetch(option, rule)
+          print_task(rule, targets)
         end
       end
 
