@@ -9,10 +9,10 @@ RSpec.describe ElasticWhenever::Task do
     end
   end
 
-  describe "#runner" do
-    it "generates rails runner commands" do
-      task.runner("Hoge.run")
-      expect(task.commands).to eq([%w(bundle exec bin/rails runner -e production Hoge.run)])
+  describe "#command" do
+    it "generates commands" do
+      task.command("hoge fuga bar:baz")
+      expect(task.commands).to eq([%w(hoge fuga bar:baz)])
     end
   end
 
@@ -20,6 +20,13 @@ RSpec.describe ElasticWhenever::Task do
     it "generates rake commands" do
       task.rake("hoge:run")
       expect(task.commands).to eq([%w(bundle exec rake hoge:run --silent)])
+    end
+  end
+
+  describe "#runner" do
+    it "generates rails runner commands" do
+      task.runner("Hoge.run")
+      expect(task.commands).to eq([%w(bundle exec bin/rails runner -e production Hoge.run)])
     end
   end
 
