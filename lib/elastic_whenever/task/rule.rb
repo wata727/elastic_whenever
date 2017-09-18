@@ -63,6 +63,24 @@ module ElasticWhenever
           "cron(#{time.min} #{time.hour} #{time.day} * ? *)"
         when :year
           "cron(#{time.min} #{time.hour} #{time.day} #{time.month} ? *)"
+        when :sunday
+          "cron(#{time.min} #{time.hour} ? * 1 *)"
+        when :monday
+          "cron(#{time.min} #{time.hour} ? * 2 *)"
+        when :tuesday
+          "cron(#{time.min} #{time.hour} ? * 3 *)"
+        when :wednesday
+          "cron(#{time.min} #{time.hour} ? * 4 *)"
+        when :thursday
+          "cron(#{time.min} #{time.hour} ? * 5 *)"
+        when :friday
+          "cron(#{time.min} #{time.hour} ? * 6 *)"
+        when :saturday
+          "cron(#{time.min} #{time.hour} ? * 7 *)"
+        when :weekend
+          "cron(#{time.min} #{time.hour} ? * 1,7 *)"
+        when :weekday
+          "cron(#{time.min} #{time.hour} ? * 2-6 *)"
         when /^((\*?\??[\d\/,\-]*)\s*){5,6}$/
           min, hour, day, mon, week, year = frequency.split(" ")
           week.gsub!("*", "?")
