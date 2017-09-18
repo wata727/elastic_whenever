@@ -11,16 +11,8 @@ module ElasticWhenever
       @commands = []
     end
 
-    def runner(src)
-      @commands << [
-        "bundle",
-        "exec",
-        "bin/rails",
-        "runner",
-        "-e",
-        @environment,
-        src
-      ]
+    def command(task)
+      @commands << task.split(" ")
     end
 
     def rake(task)
@@ -30,6 +22,18 @@ module ElasticWhenever
         "rake",
         task,
         "--silent"
+      ]
+    end
+
+    def runner(src)
+      @commands << [
+        "bundle",
+        "exec",
+        "bin/rails",
+        "runner",
+        "-e",
+        @environment,
+        src
       ]
     end
 
