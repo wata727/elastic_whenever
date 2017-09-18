@@ -37,6 +37,14 @@ module ElasticWhenever
       ]
     end
 
+    def script(script)
+      @commands << [
+        "bundle",
+        "exec",
+        "script/#{script}"
+      ]
+    end
+
     def method_missing(name, *args)
       Logger.instance.warn("Skipping unsupported method: #{name}")
     end
