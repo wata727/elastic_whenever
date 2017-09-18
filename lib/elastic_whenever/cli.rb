@@ -81,7 +81,12 @@ module ElasticWhenever
           if dry_run
             print_task(rule, targets)
           else
-            rule.create
+            begin
+              rule.create
+            rescue Aws::CloudWatchEvents::Errors::ValidationException => exn
+              Logger.instance.warn("#{exn.message} Ignore this task: name=#{rule.name} expression=#{rule.expression}")
+              next
+            end
             targets.each(&:create)
           end
         end

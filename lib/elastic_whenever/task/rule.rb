@@ -81,11 +81,21 @@ module ElasticWhenever
           "cron(#{time.min} #{time.hour} ? * 1,7 *)"
         when :weekday
           "cron(#{time.min} #{time.hour} ? * 2-6 *)"
-        when /^((\*?\??[\d\/,\-]*)\s*){5,6}$/
+        # cron syntax
+        when /^((\*?[\d\/,\-]*)\s*){5}$/
           min, hour, day, mon, week, year = frequency.split(" ")
-          week.gsub!("*", "?")
+          # You can't specify the Day-of-month and Day-of-week fields in the same Cron expression.
+          # If you specify a value in one of the fields, you must use a ? (question mark) in the other.
+          week.gsub!("*", "?") if day != "?"
+          day.gsub!("*", "?") if week != "?"
+          # cron syntax:          sunday -> 0
+          # scheduled expression: sunday -> 1
+          week.gsub!(/(\d)/) { (Integer($1) + 1) % 7 }
           year = year || "*"
           "cron(#{min} #{hour} #{day} #{mon} #{week} #{year})"
+        # schedule expression syntax
+        when /^((\*?\??L?W?[\d\/,\-]*)\s*){6}$/
+          "cron(#{frequency})"
         else
           raise UnsupportedOptionException.new("`#{frequency}` is not supported option. Ignore this task.")
         end

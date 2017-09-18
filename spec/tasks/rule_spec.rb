@@ -38,6 +38,16 @@ RSpec.describe ElasticWhenever::Task::Rule do
                                                                    )
     end
 
+    it "converts specified week cron syntax" do
+      task = ElasticWhenever::Task.new("production", "0 0 * * 0")
+      task.rake "hoge:run"
+
+      expect(ElasticWhenever::Task::Rule.convert(option, task)).to have_attributes(
+                                                                     name: "test_b7ae861e5b0deb3dde12c9a65a179fad6ad36018",
+                                                                     expression: "cron(0 0 ? * 1 *)"
+                                                                   )
+    end
+
     it "converts `day` shorthand with `at` option" do
       task = ElasticWhenever::Task.new("production", :day, at: "02:00pm")
       task.rake "hoge:run"
