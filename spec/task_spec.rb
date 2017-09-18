@@ -30,6 +30,13 @@ RSpec.describe ElasticWhenever::Task do
     end
   end
 
+  describe "script" do
+    it "generates script commands" do
+      task.script("runner.rb")
+      expect(task.commands).to eq([%w(bundle exec script/runner.rb)])
+    end
+  end
+
   describe "unsupported method" do
     it "does not change commands" do
       expect {
