@@ -4,6 +4,8 @@ module ElasticWhenever
       attr_reader :name
       attr_reader :expression
 
+      class UnsupportedOptionException < StandardError; end
+
       def self.fetch(option)
         client = Aws::CloudWatchEvents::Client.new(option.aws_config)
         client.list_rules(name_prefix: option.identifier).rules.map do |rule|
@@ -50,18 +52,24 @@ module ElasticWhenever
       end
 
       def self.schedule_expression(frequency, options)
-        time = Chronic.parse(options[:at]) || Time.new(2017, 9, 9, 0, 0, 0)
+        time = Chronic.parse(options[:at]) || Time.new(2017, 12, 1, 0, 0, 0)
 
         case frequency
         when :hour
           "cron(#{time.hour} * * * ? *)"
         when :day
           "cron(#{time.min} #{time.hour} * * ? *)"
-        else
+        when :month
+          "cron(#{time.min} #{time.hour} #{time.day} * ? *)"
+        when :year
+          "cron(#{time.min} #{time.hour} #{time.day} #{time.month} ? *)"
+        when /^((\*?\??[\d\/,\-]*)\s*){5,6}$/
           min, hour, day, mon, week, year = frequency.split(" ")
           week.gsub!("*", "?")
           year = year || "*"
           "cron(#{min} #{hour} #{day} #{mon} #{week} #{year})"
+        else
+          raise UnsupportedOptionException.new("`#{frequency}` is not supported option. Ignore this task.")
         end
       end
 
