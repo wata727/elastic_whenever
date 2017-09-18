@@ -4,6 +4,8 @@ module ElasticWhenever
       attr_reader :name
       attr_reader :expression
 
+      class UnsupportedOptionException < StandardError; end
+
       def self.fetch(option)
         client = Aws::CloudWatchEvents::Client.new(option.aws_config)
         client.list_rules(name_prefix: option.identifier).rules.map do |rule|
@@ -50,18 +52,42 @@ module ElasticWhenever
       end
 
       def self.schedule_expression(frequency, options)
-        time = Chronic.parse(options[:at]) || Time.new(2017, 9, 9, 0, 0, 0)
+        time = Chronic.parse(options[:at]) || Time.new(2017, 12, 1, 0, 0, 0)
 
         case frequency
         when :hour
-          "cron(#{time.hour} * * * ? *)"
+          "cron(#{time.min} * * * ? *)"
         when :day
           "cron(#{time.min} #{time.hour} * * ? *)"
-        else
+        when :month
+          "cron(#{time.min} #{time.hour} #{time.day} * ? *)"
+        when :year
+          "cron(#{time.min} #{time.hour} #{time.day} #{time.month} ? *)"
+        when :sunday
+          "cron(#{time.min} #{time.hour} ? * 1 *)"
+        when :monday
+          "cron(#{time.min} #{time.hour} ? * 2 *)"
+        when :tuesday
+          "cron(#{time.min} #{time.hour} ? * 3 *)"
+        when :wednesday
+          "cron(#{time.min} #{time.hour} ? * 4 *)"
+        when :thursday
+          "cron(#{time.min} #{time.hour} ? * 5 *)"
+        when :friday
+          "cron(#{time.min} #{time.hour} ? * 6 *)"
+        when :saturday
+          "cron(#{time.min} #{time.hour} ? * 7 *)"
+        when :weekend
+          "cron(#{time.min} #{time.hour} ? * 1,7 *)"
+        when :weekday
+          "cron(#{time.min} #{time.hour} ? * 2-6 *)"
+        when /^((\*?\??[\d\/,\-]*)\s*){5,6}$/
           min, hour, day, mon, week, year = frequency.split(" ")
           week.gsub!("*", "?")
           year = year || "*"
           "cron(#{min} #{hour} #{day} #{mon} #{week} #{year})"
+        else
+          raise UnsupportedOptionException.new("`#{frequency}` is not supported option. Ignore this task.")
         end
       end
 
