@@ -56,7 +56,7 @@ module ElasticWhenever
 
         case frequency
         when :hour
-          "cron(#{time.hour} * * * ? *)"
+          "cron(#{time.min} * * * ? *)"
         when :day
           "cron(#{time.min} #{time.hour} * * ? *)"
         when :month
