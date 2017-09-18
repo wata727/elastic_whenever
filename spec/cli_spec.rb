@@ -13,6 +13,7 @@ RSpec.describe ElasticWhenever::CLI do
         cluster: "test",
         task_definition: "wordpress:2",
         container: "testContainer",
+        chronic_options: {},
         tasks: [task]
       )
     end

@@ -17,11 +17,11 @@ module ElasticWhenever
         end
       end
 
-      def self.convert(option, task)
+      def self.convert(option, task, chronic_options)
         self.new(
           option,
           name: rule_name(option.identifier, task.commands),
-          expression: schedule_expression(task.frequency, task.options)
+          expression: schedule_expression(task.frequency, task.options, chronic_options)
         )
       end
 
@@ -51,8 +51,8 @@ module ElasticWhenever
         "#{identifier}_#{Digest::SHA1.hexdigest(commands.map { |command| command.join("-") }.join("-"))}"
       end
 
-      def self.schedule_expression(frequency, options)
-        time = Chronic.parse(options[:at]) || Time.new(2017, 12, 1, 0, 0, 0)
+      def self.schedule_expression(frequency, options, chronic_options)
+        time = Chronic.parse(options[:at], chronic_options) || Time.new(2017, 12, 1, 0, 0, 0)
 
         case frequency
         when :hour

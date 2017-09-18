@@ -9,6 +9,7 @@ RSpec.describe ElasticWhenever::Schedule do
                             cluster: "ecs-test",
                             task_definition: "example",
                             container: "cron",
+                            chronic_options: {},
                           )
     end
 
