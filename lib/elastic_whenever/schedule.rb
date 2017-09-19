@@ -4,6 +4,7 @@ module ElasticWhenever
     attr_reader :cluster
     attr_reader :task_definition
     attr_reader :container
+    attr_reader :chronic_options
 
     class InvalidScheduleException < StandardError; end
 
@@ -13,6 +14,7 @@ module ElasticWhenever
       @cluster = nil
       @task_definition = nil
       @container = nil
+      @chronic_options = {}
       instance_eval(File.read(file), file)
     end
 
