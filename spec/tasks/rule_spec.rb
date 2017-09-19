@@ -19,7 +19,7 @@ RSpec.describe ElasticWhenever::Task::Rule do
 
   describe "convert" do
     it "converts scheduled task syntax" do
-      task = ElasticWhenever::Task.new("production", "0 0 * * ? *")
+      task = ElasticWhenever::Task.new("production", "bundle exec", "0 0 * * ? *")
       task.rake "hoge:run"
 
       expect(ElasticWhenever::Task::Rule.convert(option, task, {})).to have_attributes(
@@ -29,7 +29,7 @@ RSpec.describe ElasticWhenever::Task::Rule do
     end
 
     it "converts cron syntax" do
-      task = ElasticWhenever::Task.new("production", "0 0 * * *")
+      task = ElasticWhenever::Task.new("production", "bundle exec", "0 0 * * *")
       task.rake "hoge:run"
 
       expect(ElasticWhenever::Task::Rule.convert(option, task, {})).to have_attributes(
@@ -39,7 +39,7 @@ RSpec.describe ElasticWhenever::Task::Rule do
     end
 
     it "converts specified week cron syntax" do
-      task = ElasticWhenever::Task.new("production", "0 0 * * 0")
+      task = ElasticWhenever::Task.new("production", "bundle exec", "0 0 * * 0")
       task.rake "hoge:run"
 
       expect(ElasticWhenever::Task::Rule.convert(option, task, {})).to have_attributes(
@@ -49,7 +49,7 @@ RSpec.describe ElasticWhenever::Task::Rule do
     end
 
     it "converts `day` shorthand with `at` option" do
-      task = ElasticWhenever::Task.new("production", :day, at: "2:00")
+      task = ElasticWhenever::Task.new("production", "bundle exec", :day, at: "2:00")
       task.rake "hoge:run"
 
       expect(ElasticWhenever::Task::Rule.convert(option, task, {})).to have_attributes(
@@ -59,7 +59,7 @@ RSpec.describe ElasticWhenever::Task::Rule do
     end
 
     it "converts `day` shorthand with `at` option and chronic options" do
-      task = ElasticWhenever::Task.new("production", :day, at: "2:00")
+      task = ElasticWhenever::Task.new("production", "bundle exec", :day, at: "2:00")
       task.rake "hoge:run"
 
       expect(ElasticWhenever::Task::Rule.convert(option, task, {:hours24 => true})).to have_attributes(
@@ -69,7 +69,7 @@ RSpec.describe ElasticWhenever::Task::Rule do
     end
 
     it "converts `hour` shorthand" do
-      task = ElasticWhenever::Task.new("production", :hour)
+      task = ElasticWhenever::Task.new("production", "bundle exec", :hour)
       task.rake "hoge:run"
 
       expect(ElasticWhenever::Task::Rule.convert(option, task, {})).to have_attributes(
@@ -79,7 +79,7 @@ RSpec.describe ElasticWhenever::Task::Rule do
     end
 
     it "converts `month` shorthand" do
-      task = ElasticWhenever::Task.new("production", :month, at: "3rd")
+      task = ElasticWhenever::Task.new("production", "bundle exec", :month, at: "3rd")
       task.rake "hoge:run"
 
       expect(ElasticWhenever::Task::Rule.convert(option, task, {})).to have_attributes(
@@ -89,7 +89,7 @@ RSpec.describe ElasticWhenever::Task::Rule do
     end
 
     it "converts `year` shorthand" do
-      task = ElasticWhenever::Task.new("production", :year)
+      task = ElasticWhenever::Task.new("production", "bundle exec", :year)
       task.rake "hoge:run"
 
       expect(ElasticWhenever::Task::Rule.convert(option, task, {})).to have_attributes(
@@ -99,7 +99,7 @@ RSpec.describe ElasticWhenever::Task::Rule do
     end
 
     it "converts `sunday` shorthand" do
-      task = ElasticWhenever::Task.new("production", :sunday)
+      task = ElasticWhenever::Task.new("production", "bundle exec", :sunday)
       task.rake "hoge:run"
 
       expect(ElasticWhenever::Task::Rule.convert(option, task, {})).to have_attributes(
@@ -109,7 +109,7 @@ RSpec.describe ElasticWhenever::Task::Rule do
     end
 
     it "converts `monday` shorthand" do
-      task = ElasticWhenever::Task.new("production", :monday, at: "10:00")
+      task = ElasticWhenever::Task.new("production", "bundle exec", :monday, at: "10:00")
       task.rake "hoge:run"
 
       expect(ElasticWhenever::Task::Rule.convert(option, task, {})).to have_attributes(
@@ -119,7 +119,7 @@ RSpec.describe ElasticWhenever::Task::Rule do
     end
 
     it "converts `tuesday` shorthand" do
-      task = ElasticWhenever::Task.new("production", :tuesday)
+      task = ElasticWhenever::Task.new("production", "bundle exec", :tuesday)
       task.rake "hoge:run"
 
       expect(ElasticWhenever::Task::Rule.convert(option, task, {})).to have_attributes(
@@ -129,7 +129,7 @@ RSpec.describe ElasticWhenever::Task::Rule do
     end
 
     it "converts `wednesday` shorthand" do
-      task = ElasticWhenever::Task.new("production", :wednesday)
+      task = ElasticWhenever::Task.new("production", "bundle exec", :wednesday)
       task.rake "hoge:run"
 
       expect(ElasticWhenever::Task::Rule.convert(option, task, {})).to have_attributes(
@@ -139,7 +139,7 @@ RSpec.describe ElasticWhenever::Task::Rule do
     end
 
     it "converts `thursday` shorthand" do
-      task = ElasticWhenever::Task.new("production", :thursday)
+      task = ElasticWhenever::Task.new("production", "bundle exec", :thursday)
       task.rake "hoge:run"
 
       expect(ElasticWhenever::Task::Rule.convert(option, task, {})).to have_attributes(
@@ -149,7 +149,7 @@ RSpec.describe ElasticWhenever::Task::Rule do
     end
 
     it "converts `friday` shorthand" do
-      task = ElasticWhenever::Task.new("production", :friday)
+      task = ElasticWhenever::Task.new("production", "bundle exec", :friday)
       task.rake "hoge:run"
 
       expect(ElasticWhenever::Task::Rule.convert(option, task, {})).to have_attributes(
@@ -159,7 +159,7 @@ RSpec.describe ElasticWhenever::Task::Rule do
     end
 
     it "converts `saturday` shorthand" do
-      task = ElasticWhenever::Task.new("production", :saturday)
+      task = ElasticWhenever::Task.new("production", "bundle exec", :saturday)
       task.rake "hoge:run"
 
       expect(ElasticWhenever::Task::Rule.convert(option, task, {})).to have_attributes(
@@ -169,7 +169,7 @@ RSpec.describe ElasticWhenever::Task::Rule do
     end
 
     it "converts `weekday` shorthand" do
-      task = ElasticWhenever::Task.new("production", :weekday)
+      task = ElasticWhenever::Task.new("production", "bundle exec", :weekday)
       task.rake "hoge:run"
 
       expect(ElasticWhenever::Task::Rule.convert(option, task, {})).to have_attributes(
@@ -179,7 +179,7 @@ RSpec.describe ElasticWhenever::Task::Rule do
     end
 
     it "converts `weekend` shorthand" do
-      task = ElasticWhenever::Task.new("production", :weekend, at: "06:30")
+      task = ElasticWhenever::Task.new("production", "bundle exec", :weekend, at: "06:30")
       task.rake "hoge:run"
 
       expect(ElasticWhenever::Task::Rule.convert(option, task, {})).to have_attributes(
@@ -190,7 +190,7 @@ RSpec.describe ElasticWhenever::Task::Rule do
 
 
     it "raise an exception when specify unsupported option" do
-      task = ElasticWhenever::Task.new("production", :reboot)
+      task = ElasticWhenever::Task.new("production", "bundle exec", :reboot)
       task.rake "hoge:run"
 
       expect { ElasticWhenever::Task::Rule.convert(option, task, {}) }.to raise_error(ElasticWhenever::Task::Rule::UnsupportedOptionException)
