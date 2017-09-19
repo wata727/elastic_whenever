@@ -4,8 +4,9 @@ module ElasticWhenever
     attr_reader :frequency
     attr_reader :options
 
-    def initialize(environment, frequency, options = {})
+    def initialize(environment, bundle_command, frequency, options = {})
       @environment = environment
+      @bundle_command = bundle_command.split(" ")
       @frequency = frequency
       @options = options
       @commands = []
@@ -16,33 +17,15 @@ module ElasticWhenever
     end
 
     def rake(task)
-      @commands << [
-        "bundle",
-        "exec",
-        "rake",
-        task,
-        "--silent"
-      ]
+      @commands << [@bundle_command, "rake", task, "--silent"].flatten
     end
 
     def runner(src)
-      @commands << [
-        "bundle",
-        "exec",
-        "bin/rails",
-        "runner",
-        "-e",
-        @environment,
-        src
-      ]
+      @commands << [@bundle_command, "bin/rails", "runner", "-e", @environment, src].flatten
     end
 
     def script(script)
-      @commands << [
-        "bundle",
-        "exec",
-        "script/#{script}"
-      ]
+      @commands << [@bundle_command, "script/#{script}"].flatten
     end
 
     def method_missing(name, *args)

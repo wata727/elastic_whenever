@@ -5,6 +5,7 @@ module ElasticWhenever
     attr_reader :task_definition
     attr_reader :container
     attr_reader :chronic_options
+    attr_reader :bundle_command
 
     class InvalidScheduleException < StandardError; end
 
@@ -15,6 +16,7 @@ module ElasticWhenever
       @task_definition = nil
       @container = nil
       @chronic_options = {}
+      @bundle_command = "bundle exec"
       instance_eval(File.read(file), file)
     end
 
@@ -23,7 +25,7 @@ module ElasticWhenever
     end
 
     def every(frequency, options = {}, &block)
-      @tasks << Task.new(@environment, frequency, options).tap do |task|
+      @tasks << Task.new(@environment, @bundle_command, frequency, options).tap do |task|
         task.instance_eval(&block)
       end
     end

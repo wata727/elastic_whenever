@@ -3,7 +3,7 @@ require "spec_helper"
 RSpec.describe ElasticWhenever::CLI do
   describe "run" do
     let(:task) do
-      ElasticWhenever::Task.new("production", "0 0 * * ? *").tap do |task|
+      ElasticWhenever::Task.new("production", "bundle exec", "0 0 * * ? *").tap do |task|
         task.runner("Hoge.run")
       end
     end
