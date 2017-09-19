@@ -3,11 +3,11 @@ module ElasticWhenever
     include Singleton
 
     def fail(message)
-      puts "[fail] #{message}"
+      STDERR.puts "[fail] #{message}"
     end
 
     def warn(message)
-      puts "[warn] #{message}"
+      STDERR.puts "[warn] #{message}"
     end
 
     def log(event, message)
