@@ -9,14 +9,16 @@ module ElasticWhenever
 
     class InvalidScheduleException < StandardError; end
 
-    def initialize(file, environment: "production")
-      @environment = environment
+    def initialize(file, variables)
+      @environment = "production"
       @tasks = []
       @cluster = nil
       @task_definition = nil
       @container = nil
       @chronic_options = {}
       @bundle_command = "bundle exec"
+
+      variables.each { |var| set(var[:key], var[:value]) }
       instance_eval(File.read(file), file)
     end
 
