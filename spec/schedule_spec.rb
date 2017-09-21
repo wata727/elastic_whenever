@@ -1,7 +1,7 @@
 require "spec_helper"
 
 RSpec.describe ElasticWhenever::Schedule do
-  let(:schedule) { ElasticWhenever::Schedule.new((Pathname(__dir__) + "fixtures/schedule.rb").to_s) }
+  let(:schedule) { ElasticWhenever::Schedule.new((Pathname(__dir__) + "fixtures/schedule.rb").to_s, []) }
 
   describe "#initialize" do
     it "has attributes" do
@@ -11,6 +11,14 @@ RSpec.describe ElasticWhenever::Schedule do
                             container: "cron",
                             chronic_options: {},
                           )
+    end
+
+    context "when received variables from cli" do
+      let(:schedule) { ElasticWhenever::Schedule.new((Pathname(__dir__) + "fixtures/schedule.rb").to_s, [{ key: "environment", value: "staging" }]) }
+
+      it "overrides attributes" do
+        expect(schedule.instance_variable_get(:@environment)).to eq "staging"
+      end
     end
 
     it "has tasks" do
@@ -33,7 +41,7 @@ RSpec.describe ElasticWhenever::Schedule do
     end
 
     context "when use unsupported method" do
-      let(:schedule) { ElasticWhenever::Schedule.new((Pathname(__dir__) + "fixtures/unsupported_schedule.rb").to_s) }
+      let(:schedule) { ElasticWhenever::Schedule.new((Pathname(__dir__) + "fixtures/unsupported_schedule.rb").to_s, []) }
 
       it "does not have tasks" do
         expect(schedule.tasks.count).to eq(0)

@@ -21,7 +21,7 @@ RSpec.describe ElasticWhenever::CLI do
     let(:definition) { double(arn: "arn:aws:ecs:us-east-1:123456789:task-definition/wordpress:2", name: "wordpress:2") }
     let(:role) { double(arn: "arn:aws:ecs:us-east-1:123456789:role/testRole") }
     before do
-      allow(ElasticWhenever::Schedule).to receive(:new).with((Pathname(__dir__) + "fixtures/schedule.rb").to_s).and_return(schedule)
+      allow(ElasticWhenever::Schedule).to receive(:new).with((Pathname(__dir__) + "fixtures/schedule.rb").to_s, kind_of(Array)).and_return(schedule)
       allow(ElasticWhenever::Task::Cluster).to receive(:new).with(kind_of(ElasticWhenever::Option), "test").and_return(cluster)
       allow(ElasticWhenever::Task::Definition).to receive(:new).with(kind_of(ElasticWhenever::Option), "wordpress:2").and_return(definition)
       allow(ElasticWhenever::Task::Role).to receive(:new).with(kind_of(ElasticWhenever::Option)).and_return(role)
@@ -76,9 +76,8 @@ RSpec.describe ElasticWhenever::CLI do
         expect(ElasticWhenever::CLI.run(%W(-i test --region us-east-1 -f #{(Pathname(__dir__) + "fixtures/schedule.rb").to_s}))).to eq ElasticWhenever::CLI::SUCCESS_EXIT_CODE
       end
 
-      it "sets variables with option" do
-        expect(schedule).to receive(:set).with("environment", "staging")
-        expect(schedule).to receive(:set).with("cluster", "ecs-test")
+      it "receives schedule file name and variables" do
+        expect(ElasticWhenever::Schedule).to receive(:new).with((Pathname(__dir__) + "fixtures/schedule.rb").to_s, [{ key: "environment", value: "staging" }, { key: "cluster", value: "ecs-test" }])
 
         ElasticWhenever::CLI.run(%W(-i test --set environment=staging&cluster=ecs-test --region us-east-1 -f #{(Pathname(__dir__) + "fixtures/schedule.rb").to_s}))
       end
