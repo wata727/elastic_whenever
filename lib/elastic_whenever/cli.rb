@@ -57,12 +57,7 @@ module ElasticWhenever
 
         clear_tasks(option) unless dry_run
         schedule.tasks.each do |task|
-          begin
-            rule = Task::Rule.convert(option, task, schedule.chronic_options)
-          rescue Task::Rule::UnsupportedOptionException => exn
-            Logger.instance.warn(exn.message)
-            next
-          end
+          rule = Task::Rule.convert(option, task)
           targets = task.commands.map do |command|
             Task::Target.new(
               option,
