@@ -18,7 +18,7 @@ RSpec.describe ElasticWhenever::CLI do
       )
     end
     let(:cluster) { double(arn: "arn:aws:ecs:us-east-1:123456789:cluster/test", name: "test") }
-    let(:definition) { double(arn: "arn:aws:ecs:us-east-1:123456789:task-definition/wordpress:2", name: "wordpress:2") }
+    let(:definition) { double(arn: "arn:aws:ecs:us-east-1:123456789:task-definition/wordpress:2", name: "wordpress:2", containers: ["testContainer"]) }
     let(:role) { double(arn: "arn:aws:ecs:us-east-1:123456789:role/testRole") }
     before do
       allow(ElasticWhenever::Schedule).to receive(:new).with((Pathname(__dir__) + "fixtures/schedule.rb").to_s, kind_of(Array)).and_return(schedule)

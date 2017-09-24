@@ -9,6 +9,7 @@ RSpec.describe ElasticWhenever::Task::Definition do
         task_definition_arn: "arn:aws:ecs:us-east-1:1234567890:task_definition/wordpress:1",
         family: "wordpress",
         revision: 1,
+        container_definitions: [double(name: "testContainer")]
       )
     end
 
@@ -21,6 +22,7 @@ RSpec.describe ElasticWhenever::Task::Definition do
       expect(ElasticWhenever::Task::Definition.new(option, "wordpress")).to have_attributes(
                                                                               name: "wordpress:1",
                                                                               arn: "arn:aws:ecs:us-east-1:1234567890:task_definition/wordpress:1",
+                                                                              containers: ["testContainer"]
                                                                             )
     end
   end

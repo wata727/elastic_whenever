@@ -36,7 +36,8 @@ module ElasticWhenever
         ERROR_EXIT_CODE
       rescue OptionParser::MissingArgument,
         Option::InvalidOptionException,
-        Schedule::InvalidScheduleException => exn
+        Schedule::InvalidScheduleException,
+        Task::Target::InvalidContainerException => exn
 
         Logger.instance.fail(exn.message)
         ERROR_EXIT_CODE
