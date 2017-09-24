@@ -47,6 +47,208 @@ RSpec.describe ElasticWhenever::Schedule do
     end
   end
 
+  describe "WheneverNumeric" do
+    before do
+      allow(File).to receive(:read).and_return(file)
+    end
+
+    context "when use 1.minute" do
+      let(:file) do
+        <<~FILE
+          every 1.minute do
+            rake "hoge:run"
+          end
+        FILE
+      end
+
+      it "has expression" do
+        expect(schedule.tasks.first).to have_attributes(expression: "cron(* * * * ? *)")
+      end
+    end
+
+    context "when use 5.minutes" do
+      let(:file) do
+        <<~FILE
+          every 5.minutes do
+            rake "hoge:run"
+          end
+        FILE
+      end
+
+      it "has expression" do
+        expect(schedule.tasks.first).to have_attributes(expression: "cron(0,5,10,15,20,25,30,35,40,45,50,55 * * * ? *)")
+      end
+    end
+
+    context "when use 21.minutes" do
+      let(:file) do
+        <<~FILE
+          every 21.minutes do
+            rake "hoge:run"
+          end
+        FILE
+      end
+
+      it "has expression" do
+        expect(schedule.tasks.first).to have_attributes(expression: "cron(21,42 * * * ? *)")
+      end
+    end
+
+    context "when use 120.minutes" do
+      let(:file) do
+        <<~FILE
+          every 120.minutes do
+            rake "hoge:run"
+          end
+        FILE
+      end
+
+      it "has expression" do
+        expect(schedule.tasks.first).to have_attributes(expression: "cron(0 0,2,4,6,8,10,12,14,16,18,20,22 * * ? *)")
+      end
+    end
+
+    context "when use 1.hour" do
+      let(:file) do
+        <<~FILE
+          every 1.hour do
+            rake "hoge:run"
+          end
+        FILE
+      end
+
+      it "has expression" do
+        expect(schedule.tasks.first).to have_attributes(expression: "cron(0 * * * ? *)")
+      end
+    end
+
+    context "when use 4.hours" do
+      let(:file) do
+        <<~FILE
+          every 4.hours do
+            rake "hoge:run"
+          end
+        FILE
+      end
+
+      it "has expression" do
+        expect(schedule.tasks.first).to have_attributes(expression: "cron(0 0,4,8,12,16,20 * * ? *)")
+      end
+    end
+
+    context "when use 11.hours" do
+      let(:file) do
+        <<~FILE
+          every 11.hours do
+            rake "hoge:run"
+          end
+        FILE
+      end
+
+      it "has expression" do
+        expect(schedule.tasks.first).to have_attributes(expression: "cron(0 11,22 * * ? *)")
+      end
+    end
+
+    context "when use 1.day" do
+      let(:file) do
+        <<~FILE
+          every 1.day do
+            rake "hoge:run"
+          end
+        FILE
+      end
+
+      it "has expression" do
+        expect(schedule.tasks.first).to have_attributes(expression: "cron(0 0 * * ? *)")
+      end
+    end
+
+    context "when use 10.days" do
+      let(:file) do
+        <<~FILE
+          every 10.days do
+            rake "hoge:run"
+          end
+        FILE
+      end
+
+      it "has expression" do
+        expect(schedule.tasks.first).to have_attributes(expression: "cron(0 0 1,11,21 * ? *)")
+      end
+    end
+
+    context "when use 17.days" do
+      let(:file) do
+        <<~FILE
+          every 17.days do
+            rake "hoge:run"
+          end
+        FILE
+      end
+
+      it "has expression" do
+        expect(schedule.tasks.first).to have_attributes(expression: "cron(0 0 17 * ? *)")
+      end
+    end
+
+    context "when use 1.month" do
+      let(:file) do
+        <<~FILE
+          every 1.month do
+            rake "hoge:run"
+          end
+        FILE
+      end
+
+      it "has expression" do
+        expect(schedule.tasks.first).to have_attributes(expression: "cron(0 0 1 * ? *)")
+      end
+    end
+
+    context "when use 2.months" do
+      let(:file) do
+        <<~FILE
+          every 2.months do
+            rake "hoge:run"
+          end
+        FILE
+      end
+
+      it "has expression" do
+        expect(schedule.tasks.first).to have_attributes(expression: "cron(0 0 1 1,3,5,7,9,11 ? *)")
+      end
+    end
+
+    context "when use 7.months" do
+      let(:file) do
+        <<~FILE
+          every 7.months do
+            rake "hoge:run"
+          end
+        FILE
+      end
+
+      it "has expression" do
+        expect(schedule.tasks.first).to have_attributes(expression: "cron(0 0 1 7 ? *)")
+      end
+    end
+
+    context "when use 1.year" do
+      let(:file) do
+        <<~FILE
+          every 1.year do
+            rake "hoge:run"
+          end
+        FILE
+      end
+
+      it "has expression" do
+        expect(schedule.tasks.first).to have_attributes(expression: "cron(0 0 1 12 ? *)")
+      end
+    end
+  end
+
   describe "#set" do
     it "sets value" do
       expect {

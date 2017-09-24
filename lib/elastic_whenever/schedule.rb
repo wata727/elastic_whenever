@@ -10,6 +10,46 @@ module ElasticWhenever
     class InvalidScheduleException < StandardError; end
     class UnsupportedFrequencyException < StandardError; end
 
+    module WheneverNumeric
+      refine Numeric do
+        def seconds
+          self
+        end
+        alias :second :seconds
+
+        def minutes
+          self * 60
+        end
+        alias :minute :minutes
+
+        def hours
+          (self * 60).minutes
+        end
+        alias :hour :hours
+
+        def days
+          (self * 24).hours
+        end
+        alias :day :days
+
+        def weeks
+          (self * 7).days
+        end
+        alias :week :weeks
+
+        def months
+          (self * 30).days
+        end
+        alias :month :months
+
+        def years
+          (self * 365.25).days
+        end
+        alias :year :years
+      end
+    end
+    using WheneverNumeric
+
     def initialize(file, variables)
       @environment = "production"
       @tasks = []
@@ -45,13 +85,15 @@ module ElasticWhenever
       time = Chronic.parse(options[:at], @chronic_options) || Time.new(2017, 12, 1, 0, 0, 0)
 
       case frequency
-      when :hour
+      when 1.minute
+        "cron(* * * * ? *)"
+      when :hour, 1.hour
         "cron(#{time.min} * * * ? *)"
-      when :day
+      when :day, 1.day
         "cron(#{time.min} #{time.hour} * * ? *)"
-      when :month
+      when :month, 1.month
         "cron(#{time.min} #{time.hour} #{time.day} * ? *)"
-      when :year
+      when :year, 1.year
         "cron(#{time.min} #{time.hour} #{time.day} #{time.month} ? *)"
       when :sunday
         "cron(#{time.min} #{time.hour} ? * 1 *)"
@@ -71,6 +113,30 @@ module ElasticWhenever
         "cron(#{time.min} #{time.hour} ? * 1,7 *)"
       when :weekday
         "cron(#{time.min} #{time.hour} ? * 2-6 *)"
+      when 1.second...1.minute
+        raise UnsupportedFrequencyException.new("Time must be in minutes or higher. Ignore this task.")
+      when 1.minute...1.hour
+        step = (frequency / 60).round
+        min = []
+        (60 % step == 0 ? 0 : step).step(59, step) { |i| min << i }
+        "cron(#{min.join(",")} * * * ? *)"
+      when 1.hour...1.day
+        step = (frequency / 60 / 60).round
+        hour = []
+        (24 % step == 0 ? 0 : step).step(23, step) { |i| hour << i }
+        "cron(#{time.min} #{hour.join(",")} * * ? *)"
+      when 1.day...1.month
+        step = (frequency / 24 / 60 / 60).round
+        day = []
+        (step <= 16 ? 1 : step).step(30, step) { |i| day << i }
+        "cron(#{time.min} #{time.hour} #{day.join(",")} * ? *)"
+      when 1.month...12.months
+        step = (frequency / 30 / 24 / 60 / 60).round
+        month = []
+        (step <= 6 ? 1 : step).step(12, step) { |i| month << i }
+        "cron(#{time.min} #{time.hour} #{time.day} #{month.join(",")} ? *)"
+      when 12.months...Float::INFINITY
+        raise UnsupportedFrequencyException.new("Time must be in months or lower. Ignore this task.")
       # cron syntax
       when /^((\*?[\d\/,\-]*)\s*){5}$/
         min, hour, day, mon, week, year = frequency.split(" ")
