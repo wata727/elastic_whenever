@@ -6,6 +6,8 @@ module ElasticWhenever
       attr_reader :container
       attr_reader :commands
 
+      class InvalidContainerException < StandardError; end
+
       def self.fetch(option, rule)
         client = Aws::CloudWatchEvents::Client.new(option.aws_config)
         targets = client.list_targets_by_rule(rule: rule.name).targets
@@ -25,6 +27,10 @@ module ElasticWhenever
       end
 
       def initialize(option, cluster:, definition:, container:, commands:, rule:, role:)
+        unless definition.containers.include?(container)
+          raise InvalidContainerException.new("#{container} is invalid container. valid=#{definition.containers.join(",")}")
+        end
+
         @cluster = cluster
         @definition = definition
         @container = container

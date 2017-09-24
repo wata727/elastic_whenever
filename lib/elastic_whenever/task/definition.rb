@@ -16,6 +16,10 @@ module ElasticWhenever
         definition&.task_definition_arn
       end
 
+      def containers
+        definition&.container_definitions&.map(&:name)
+      end
+
       private
 
       attr_reader :client

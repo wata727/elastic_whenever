@@ -5,11 +5,27 @@ RSpec.describe ElasticWhenever::Task::Target do
   let(:option) { ElasticWhenever::Option.new(%w(-i test)) }
   let(:rule) { double(name: "test_rule") }
   let(:cluster) { double(arn: "arn:aws:ecs:us-east-1:123456789:cluster/test") }
-  let(:definition) { double(arn: "arn:aws:ecs:us-east-1:123456789:task-definition/wordpress:2") }
+  let(:definition) { double(arn: "arn:aws:ecs:us-east-1:123456789:task-definition/wordpress:2", containers: ["testContainer"]) }
   let(:role) { double(arn: "arn:aws:ecs:us-east-1:123456789:role/testRole") }
 
   before do
     allow(Aws::CloudWatchEvents::Client).to receive(:new).and_return(client)
+  end
+
+  describe "#initialize" do
+    it "raises exception" do
+      expect {
+        ElasticWhenever::Task::Target.new(
+          option,
+          cluster: cluster,
+          definition: definition,
+          container: "invalidContainer",
+          commands: ["bundle", "exec", "rake", "spec"],
+          rule: rule,
+          role: role,
+        )
+      }.to raise_error(ElasticWhenever::Task::Target::InvalidContainerException)
+    end
   end
 
   describe "fetch" do
