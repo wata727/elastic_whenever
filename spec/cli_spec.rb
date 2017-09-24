@@ -3,7 +3,7 @@ require "spec_helper"
 RSpec.describe ElasticWhenever::CLI do
   describe "run" do
     let(:task) do
-      ElasticWhenever::Task.new("production", "bundle exec", "0 0 * * ? *").tap do |task|
+      ElasticWhenever::Task.new("production", "bundle exec", "cron(0 0 * * ? *)").tap do |task|
         task.runner("Hoge.run")
       end
     end
@@ -87,17 +87,6 @@ RSpec.describe ElasticWhenever::CLI do
 
         it "returns error status code" do
           expect(ElasticWhenever::CLI.run(%W(-i test --region us-east-1 -f #{(Pathname(__dir__) + "fixtures/schedule.rb").to_s}))).to eq ElasticWhenever::CLI::ERROR_EXIT_CODE
-        end
-      end
-
-      context "when raises unsupported exception" do
-        before { allow(ElasticWhenever::Task::Rule).to receive(:convert).and_raise(ElasticWhenever::Task::Rule::UnsupportedOptionException) }
-
-        it "does not create tasks" do
-          expect_any_instance_of(ElasticWhenever::Task::Rule).not_to receive(:create)
-          expect_any_instance_of(ElasticWhenever::Task::Target).not_to receive(:create)
-
-          ElasticWhenever::CLI.run(%W(-i test --region us-east-1 -f #{(Pathname(__dir__) + "fixtures/schedule.rb").to_s}))
         end
       end
     end

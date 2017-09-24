@@ -1,11 +1,11 @@
 require "spec_helper"
 
 RSpec.describe ElasticWhenever::Task do
-  let(:task) { ElasticWhenever::Task.new("production", "bundle exec", :day, at: "05:00pm") }
+  let(:task) { ElasticWhenever::Task.new("production", "bundle exec", "cron(0 17 * * ? *)") }
 
   describe "#initialize" do
     it "has attributes" do
-      expect(task).to have_attributes(frequency: :day, options: { at: "05:00pm" })
+      expect(task).to have_attributes(expression: "cron(0 17 * * ? *)")
     end
   end
 
@@ -23,7 +23,7 @@ RSpec.describe ElasticWhenever::Task do
     end
 
     context "when unset bundle command" do
-      let(:task) { ElasticWhenever::Task.new("production", "", :day, at: "05:00pm") }
+      let(:task) { ElasticWhenever::Task.new("production", "", "cron(0 17 * * ? *)") }
 
       it "generates rake commands" do
         task.rake("hoge:run")
@@ -39,7 +39,7 @@ RSpec.describe ElasticWhenever::Task do
     end
 
     context "when unset bundle command" do
-      let(:task) { ElasticWhenever::Task.new("production", "", :day, at: "05:00pm") }
+      let(:task) { ElasticWhenever::Task.new("production", "", "cron(0 17 * * ? *)") }
 
       it "generates rake commands" do
         task.runner("Hoge.run")
@@ -55,7 +55,7 @@ RSpec.describe ElasticWhenever::Task do
     end
 
     context "when unset bundle command" do
-      let(:task) { ElasticWhenever::Task.new("production", "", :day, at: "05:00pm") }
+      let(:task) { ElasticWhenever::Task.new("production", "", "cron(0 17 * * ? *)") }
 
       it "generates rake commands" do
         task.script("runner.rb")

@@ -1,14 +1,12 @@
 module ElasticWhenever
   class Task
     attr_reader :commands
-    attr_reader :frequency
-    attr_reader :options
+    attr_reader :expression
 
-    def initialize(environment, bundle_command, frequency, options = {})
+    def initialize(environment, bundle_command, expression)
       @environment = environment
       @bundle_command = bundle_command.split(" ")
-      @frequency = frequency
-      @options = options
+      @expression = expression
       @commands = []
     end
 
