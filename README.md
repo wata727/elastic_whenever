@@ -1,4 +1,7 @@
 # Elastic Whenever
+[![Build Status](https://travis-ci.org/wata727/elastic_whenever.svg?branch=master)](https://travis-ci.org/wata727/elastic_whenever)
+[![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE.txt)
+[![Gem Version](https://badge.fury.io/rb/elastic_whenever.svg)](https://badge.fury.io/rb/elastic_whenever)
 
 Manage ECS scheduled tasks like whenever gem.
 
