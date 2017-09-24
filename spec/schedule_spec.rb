@@ -220,6 +220,20 @@ RSpec.describe ElasticWhenever::Schedule do
       end
     end
 
+    context "when use 2.months with `at` option" do
+      let(:file) do
+        <<~FILE
+          every 2.months, :at => "3:00" do
+            rake "hoge:run"
+          end
+        FILE
+      end
+
+      it "has expression" do
+        expect(schedule.tasks.first).to have_attributes(expression: "cron(0 15 1 1,3,5,7,9,11 ? *)")
+      end
+    end
+
     context "when use 7.months" do
       let(:file) do
         <<~FILE

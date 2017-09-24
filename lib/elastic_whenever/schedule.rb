@@ -82,7 +82,8 @@ module ElasticWhenever
     end
 
     def schedule_expression(frequency, options)
-      time = Chronic.parse(options[:at], @chronic_options) || Time.new(2017, 12, 1, 0, 0, 0)
+      opts =  { :now => Time.new(2017, 12, 1, 0, 0, 0) }.merge(@chronic_options)
+      time = Chronic.parse(options[:at], opts) || Time.new(2017, 12, 1, 0, 0, 0)
 
       case frequency
       when 1.minute
