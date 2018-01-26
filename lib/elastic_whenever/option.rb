@@ -79,7 +79,7 @@ module ElasticWhenever
     end
 
     def validate!
-      raise InvalidOptionException.new("Can't find file: #{schedule_file}") unless File.exists?(schedule_file)
+      raise InvalidOptionException.new("Can't find file: #{schedule_file}") unless File.exist?(schedule_file)
     end
 
     private
