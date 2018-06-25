@@ -6,6 +6,7 @@ module ElasticWhenever
     attr_reader :container
     attr_reader :chronic_options
     attr_reader :bundle_command
+    attr_reader :environment
 
     class InvalidScheduleException < StandardError; end
     class UnsupportedFrequencyException < StandardError; end
