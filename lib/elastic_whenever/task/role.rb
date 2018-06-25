@@ -20,7 +20,9 @@ module ElasticWhenever
       end
 
       def exists?
-        !!role
+        !!arn
+      rescue Aws::IAM::Errors::NoSuchEntity
+        false
       end
 
       def arn

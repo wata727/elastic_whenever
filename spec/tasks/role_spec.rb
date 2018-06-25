@@ -55,5 +55,14 @@ RSpec.describe ElasticWhenever::Task::Role do
         expect(ElasticWhenever::Task::Role.new(option)).not_to be_exists
       end
     end
+    context "when role not found (deloay load)" do
+      before do
+        allow(role).to receive(:arn).and_raise(Aws::IAM::Errors::NoSuchEntity.new('context','error'))
+      end
+
+      it "returns false" do
+        expect(ElasticWhenever::Task::Role.new(option)).not_to be_exists
+      end
+    end
   end
 end
