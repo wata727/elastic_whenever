@@ -48,7 +48,7 @@ RSpec.describe ElasticWhenever::Task::Role do
 
     context "when role not found" do
       before do
-        allow(resource).to receive(:role).with(ElasticWhenever::Task::Role::NAME).and_return(nil)
+        allow(role).to receive(:arn).and_raise(Aws::IAM::Errors::NoSuchEntity.new('context','error'))
       end
 
       it "returns false" do
