@@ -83,7 +83,6 @@ module ElasticWhenever
                 input: input_json(container, commands),
                 role_arn: role.arn,
                 ecs_parameters: {
-                  launch_type: launch_type,
                   task_definition_arn: definition.arn,
                   task_count: 1,
                 }
