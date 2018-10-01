@@ -5,6 +5,10 @@ module ElasticWhenever
       attr_reader :definition
       attr_reader :container
       attr_reader :commands
+      attr_reader :assign_public_ip
+      attr_reader :launch_type
+      attr_reader :security_groups
+      attr_reader :subnets
 
       class InvalidContainerException < StandardError; end
 
@@ -37,25 +41,56 @@ module ElasticWhenever
         @commands = commands
         @rule = rule
         @role = role
+        @assign_public_ip = option.assign_public_ip
+        @launch_type = option.launch_type
+        @security_groups = option.security_groups
+        @subnets = option.subnets
         @client = Aws::CloudWatchEvents::Client.new(option.aws_config)
       end
 
       def create
-        client.put_targets(
-          rule: rule.name,
-          targets: [
-            {
-              id: Digest::SHA1.hexdigest(commands.join("-")),
-              arn: cluster.arn,
-              input: input_json(container, commands),
-              role_arn: role.arn,
-              ecs_parameters: {
-                task_definition_arn: definition.arn,
-                task_count: 1,
+        if launch_type == 'FARGATE'
+          client.put_targets(
+            rule: rule.name,
+            targets: [
+              {
+                id: Digest::SHA1.hexdigest(commands.join("-")),
+                arn: cluster.arn,
+                input: input_json(container, commands),
+                role_arn: role.arn,
+                ecs_parameters: {
+                  launch_type: launch_type,
+                  task_definition_arn: definition.arn,
+                  task_count: 1,
+                  network_configuration: {
+                    awsvpc_configuration: {
+                      subnets: [ subnets ],
+                      security_groups: [ security_groups ],
+                      assign_public_ip: assign_public_ip,
+                    }
+                  }
+                }
               }
-            }
-          ]
-        )
+            ]
+          )
+        else
+          client.put_targets(
+            rule: rule.name,
+            targets: [
+              {
+                id: Digest::SHA1.hexdigest(commands.join("-")),
+                arn: cluster.arn,
+                input: input_json(container, commands),
+                role_arn: role.arn,
+                ecs_parameters: {
+                  launch_type: launch_type,
+                  task_definition_arn: definition.arn,
+                  task_count: 1,
+                }
+              }
+            ]
+          )
+        end
       end
 
       private

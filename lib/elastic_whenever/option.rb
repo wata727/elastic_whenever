@@ -9,6 +9,10 @@ module ElasticWhenever
     attr_reader :identifier
     attr_reader :mode
     attr_reader :variables
+    attr_reader :assign_public_ip
+    attr_reader :launch_type
+    attr_reader :security_groups
+    attr_reader :subnets
     attr_reader :schedule_file
 
     class InvalidOptionException < StandardError; end
@@ -17,6 +21,10 @@ module ElasticWhenever
       @identifier = nil
       @mode = DRYRUN_MODE
       @variables = []
+      @assign_public_ip = 'DISABLED'
+      @launch_type = 'EC2'
+      @security_groups = nil
+      @subnets = nil
       @schedule_file = 'config/schedule.rb'
       @profile = nil
       @access_key = nil
@@ -46,6 +54,18 @@ module ElasticWhenever
             key, value = pair.split('=')
             @variables << { key: key, value: value }
           end
+        end
+        opts.on('--assign_public_ip', 'Assign a public IP.') do
+          @assign_public_ip = 'ENABLED'
+        end
+        opts.on('--launch_type launch_type', 'Launch type. Defualt: EC2') do |launch_type|
+          @launch_type = launch_type
+        end
+        opts.on('--security_groups groups', "Example: --security_groups 'sg-2c503655,sg-72f0cb0a'") do |groups|
+          @security_groups = groups
+        end
+        opts.on('--subnets subnets', "Example: --subnets 'subnet-4973d63f,subnet-45827d1d'") do |subnets|
+          @subnets = subnets
         end
         opts.on('-f', '--file schedule_file', 'Default: config/schedule.rb') do |file|
           @schedule_file = file
