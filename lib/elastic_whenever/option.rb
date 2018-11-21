@@ -8,9 +8,11 @@ module ElasticWhenever
 
     attr_reader :identifier
     attr_reader :mode
+    attr_reader :verbose
     attr_reader :variables
     attr_reader :assign_public_ip
     attr_reader :launch_type
+    attr_reader :platform_version
     attr_reader :security_groups
     attr_reader :subnets
     attr_reader :schedule_file
@@ -20,9 +22,11 @@ module ElasticWhenever
     def initialize(args)
       @identifier = nil
       @mode = DRYRUN_MODE
+      @verbose = false
       @variables = []
       @assign_public_ip = 'DISABLED'
       @launch_type = 'EC2'
+      @platform_version = 'LATEST'
       @security_groups = nil
       @subnets = nil
       @schedule_file = 'config/schedule.rb'
@@ -67,6 +71,9 @@ module ElasticWhenever
         opts.on('--subnets subnets', "Example: --subnets 'subnet-4973d63f,subnet-45827d1d'") do |subnets|
           @subnets = subnets
         end
+        opts.on('--platform_version version', "For Fargate launch type, optionally specify the platform version. Example: --platform_version 1.2.0") do |version|
+          @platform_version = version
+        end
         opts.on('-f', '--file schedule_file', 'Default: config/schedule.rb') do |file|
           @schedule_file = file
         end
@@ -84,6 +91,9 @@ module ElasticWhenever
         end
         opts.on('-v', '--version', 'Print version') do
           @mode = PRINT_VERSION_MODE
+        end
+        opts.on('-V', '--verbose', 'Run rake jobs without --silent') do
+          @verbose = true
         end
       end.parse(args)
 
