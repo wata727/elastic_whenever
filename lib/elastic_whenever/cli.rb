@@ -46,7 +46,7 @@ module ElasticWhenever
       private
 
       def update_tasks(option, dry_run:)
-        schedule = Schedule.new(option.schedule_file, option.variables)
+        schedule = Schedule.new(option.schedule_file, option.verbose, option.variables)
         schedule.validate!
 
         cluster = Task::Cluster.new(option, schedule.cluster)

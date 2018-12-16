@@ -51,8 +51,9 @@ module ElasticWhenever
     end
     using WheneverNumeric
 
-    def initialize(file, variables)
+    def initialize(file, verbose, variables)
       @environment = "production"
+      @verbose = verbose
       @tasks = []
       @cluster = nil
       @task_definition = nil
@@ -69,7 +70,7 @@ module ElasticWhenever
     end
 
     def every(frequency, options = {}, &block)
-      @tasks << Task.new(@environment, @bundle_command, schedule_expression(frequency, options)).tap do |task|
+      @tasks << Task.new(@environment, @verbose, @bundle_command, schedule_expression(frequency, options)).tap do |task|
         task.instance_eval(&block)
       end
     rescue UnsupportedFrequencyException => exn
