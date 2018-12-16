@@ -82,6 +82,7 @@ RSpec.describe ElasticWhenever::Task::Target do
             }.to_json,
             role_arn: "arn:aws:ecs:us-east-1:123456789:role/testRole",
             ecs_parameters: {
+              launch_type: "EC2",
               task_definition_arn: "arn:aws:ecs:us-east-1:123456789:task-definition/wordpress:2",
               task_count: 1,
             }
