@@ -6,6 +6,10 @@ RSpec.describe ElasticWhenever::Option do
       expect(ElasticWhenever::Option.new(nil)).to have_attributes(
                                                     identifier: nil,
                                                     mode: ElasticWhenever::Option::DRYRUN_MODE,
+                                                    verbose: false,
+                                                    assign_public_ip: 'DISABLED',
+                                                    launch_type: 'EC2',
+                                                    platform_version: 'LATEST',
                                                     variables: [],
                                                     schedule_file: "config/schedule.rb"
                                                   )
@@ -13,13 +17,29 @@ RSpec.describe ElasticWhenever::Option do
 
     it "has custom config" do
       expect(
-        ElasticWhenever::Option.new(%w(--set environment=staging&cluster=ecs-test -f custom_schedule.rb))
+        ElasticWhenever::Option.new(%w(
+          --set environment=staging&foo=bar
+          -f custom_schedule.rb
+          --cluster test
+          --task-definition wordpress:2
+          --container testContainer
+          --launch_type FARGATE
+          --assign-public-ip
+          --security-groups sg-2c503655,sg-72f0cb0a
+          --subnets subnet-4973d63f,subnet-45827d1d
+          --platform-version 1.1.0
+          --verbose
+        ))
       ).to have_attributes(
         identifier: nil,
         mode: ElasticWhenever::Option::DRYRUN_MODE,
+        verbose: true,
+        assign_public_ip: 'ENABLED',
+        launch_type: 'FARGATE',
+        platform_version: '1.1.0',
         variables: [
           { key: "environment", value: "staging" },
-          { key: "cluster", value: "ecs-test" },
+          { key: "foo", value: "bar" },
         ],
         schedule_file: "custom_schedule.rb"
       )
@@ -90,11 +110,53 @@ RSpec.describe ElasticWhenever::Option do
 
   describe "#validate!" do
     it "raise exception when schedule file is not found" do
-      expect { ElasticWhenever::Option.new(%w(-f invalid/file.rb)).validate! }.to raise_error(ElasticWhenever::Option::InvalidOptionException, "Can't find file: invalid/file.rb")
+      expect { 
+        ElasticWhenever::Option.new(%W(
+          -f invalid/file.rb
+          --cluster test
+          --task-definition wordpress:2
+          --container testContainer
+        )).validate! 
+      }.to raise_error(ElasticWhenever::Option::InvalidOptionException, "Can't find file: invalid/file.rb")
     end
 
-    it "doesnt raise exception when schedule file is found" do
-      ElasticWhenever::Option.new(["-f", (Pathname(__dir__) + "fixtures/schedule.rb").to_s]).validate!
+    it "raise exception when cluster is undefined" do
+      expect { 
+        ElasticWhenever::Option.new(%W(
+          -f #{Pathname(__dir__) + "fixtures/schedule.rb"}
+          --task-definition wordpress:2
+          --container testContainer
+        )).validate! 
+      }.to raise_error(ElasticWhenever::Option::InvalidOptionException, "You must set cluster")
+    end
+
+    it "raise exception when task definition is undefined" do
+      expect { 
+        ElasticWhenever::Option.new(%W(
+          -f #{Pathname(__dir__) + "fixtures/schedule.rb"}
+          --cluster test
+          --container testContainer
+        )).validate! 
+      }.to raise_error(ElasticWhenever::Option::InvalidOptionException, "You must set task definition")
+    end
+
+    it "raise exception when container is undefined" do
+      expect { 
+        ElasticWhenever::Option.new(%W(
+          -f #{Pathname(__dir__) + "fixtures/schedule.rb"}
+          --cluster test
+          --task-definition wordpress:2
+        )).validate! 
+      }.to raise_error(ElasticWhenever::Option::InvalidOptionException, "You must set container")
+    end
+
+    it "doesn't raise exception" do
+      ElasticWhenever::Option.new(%W(
+          -f #{Pathname(__dir__) + "fixtures/schedule.rb"}
+          --cluster test
+          --task-definition wordpress:2
+          --container testContainer
+      )).validate!
     end
   end
 end

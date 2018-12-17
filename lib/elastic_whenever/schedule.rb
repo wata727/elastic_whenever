@@ -1,14 +1,10 @@
 module ElasticWhenever
   class Schedule
     attr_reader :tasks
-    attr_reader :cluster
-    attr_reader :task_definition
-    attr_reader :container
     attr_reader :chronic_options
     attr_reader :bundle_command
     attr_reader :environment
 
-    class InvalidScheduleException < StandardError; end
     class UnsupportedFrequencyException < StandardError; end
 
     module WheneverNumeric
@@ -55,9 +51,6 @@ module ElasticWhenever
       @environment = "production"
       @verbose = verbose
       @tasks = []
-      @cluster = nil
-      @task_definition = nil
-      @container = nil
       @chronic_options = {}
       @bundle_command = "bundle exec"
 
@@ -75,12 +68,6 @@ module ElasticWhenever
       end
     rescue UnsupportedFrequencyException => exn
       Logger.instance.warn(exn.message)
-    end
-
-    def validate!
-      raise InvalidScheduleException.new("You must set cluster") unless cluster
-      raise InvalidScheduleException.new("You must set task definition") unless task_definition
-      raise InvalidScheduleException.new("You must set container") unless container
     end
 
     def schedule_expression(frequency, options)

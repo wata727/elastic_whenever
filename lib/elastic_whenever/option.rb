@@ -10,6 +10,9 @@ module ElasticWhenever
     attr_reader :mode
     attr_reader :verbose
     attr_reader :variables
+    attr_reader :cluster
+    attr_reader :task_definition
+    attr_reader :container
     attr_reader :assign_public_ip
     attr_reader :launch_type
     attr_reader :platform_version
@@ -24,6 +27,9 @@ module ElasticWhenever
       @mode = DRYRUN_MODE
       @verbose = false
       @variables = []
+      @cluster = nil
+      @task_definition = nil
+      @container = nil
       @assign_public_ip = 'DISABLED'
       @launch_type = 'EC2'
       @platform_version = 'LATEST'
@@ -48,7 +54,7 @@ module ElasticWhenever
           @identifier = identifier
           @mode = LIST_MODE
         end
-        opts.on('-s' ,'--set variables', "Example: --set 'environment=staging&cluster=ecs-test'") do |set|
+        opts.on('-s' ,'--set variables', "Example: --set 'environment=staging'") do |set|
           pairs = set.split('&')
           pairs.each do |pair|
             unless pair.include?('=')
@@ -59,19 +65,28 @@ module ElasticWhenever
             @variables << { key: key, value: value }
           end
         end
-        opts.on('--assign_public_ip', 'Assign a public IP.') do
-          @assign_public_ip = 'ENABLED'
+        opts.on('--cluster cluster', 'ECS cluster to run tasks') do |cluster|
+          @cluster = cluster
         end
-        opts.on('--launch_type launch_type', 'Launch type. Defualt: EC2') do |launch_type|
+        opts.on('--task-definition task_definition', 'Task definition name, If omit a revision, use the latest revision of the family automatically. Example: --task-deifinition oneoff-application:2') do |definition|
+          @task_definition = definition
+        end
+        opts.on('--container container', 'Container name defined in the task definition') do |container|
+          @container = container
+        end
+        opts.on('--launch-type launch_type', 'Launch type. EC2 or FARGATE. Defualt: EC2') do |launch_type|
           @launch_type = launch_type
         end
-        opts.on('--security_groups groups', "Example: --security_groups 'sg-2c503655,sg-72f0cb0a'") do |groups|
+        opts.on('--assign-public-ip', 'Assign a public IP. Default: DISABLED (FARGATE only)') do
+          @assign_public_ip = 'ENABLED'
+        end
+        opts.on('--security-groups groups', "Example: --security-groups 'sg-2c503655,sg-72f0cb0a' (FARGATE only)") do |groups|
           @security_groups = groups
         end
-        opts.on('--subnets subnets', "Example: --subnets 'subnet-4973d63f,subnet-45827d1d'") do |subnets|
+        opts.on('--subnets subnets', "Example: --subnets 'subnet-4973d63f,subnet-45827d1d' (FARGATE only)") do |subnets|
           @subnets = subnets
         end
-        opts.on('--platform_version version', "For Fargate launch type, optionally specify the platform version. Example: --platform_version 1.2.0") do |version|
+        opts.on('--platform-version version', "Optionally specify the platform version. Default: LATEST (FARGATE only)") do |version|
           @platform_version = version
         end
         opts.on('-f', '--file schedule_file', 'Default: config/schedule.rb') do |file|
@@ -110,6 +125,9 @@ module ElasticWhenever
 
     def validate!
       raise InvalidOptionException.new("Can't find file: #{schedule_file}") unless File.exist?(schedule_file)
+      raise InvalidOptionException.new("You must set cluster") unless cluster
+      raise InvalidOptionException.new("You must set task definition") unless task_definition
+      raise InvalidOptionException.new("You must set container") unless container
     end
 
     private
