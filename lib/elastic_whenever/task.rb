@@ -5,7 +5,7 @@ module ElasticWhenever
 
     def initialize(environment, verbose, bundle_command, expression)
       @environment = environment
-      @verbose_mode = verbose ? '' : "--silent"
+      @verbose_mode = verbose ? nil : "--silent"
       @bundle_command = bundle_command.split(" ")
       @expression = expression
       @commands = []
@@ -16,7 +16,7 @@ module ElasticWhenever
     end
 
     def rake(task)
-      @commands << [@bundle_command, "rake", task, @verbose_mode].flatten
+      @commands << [@bundle_command, "rake", task, @verbose_mode].flatten.compact
     end
 
     def runner(src)

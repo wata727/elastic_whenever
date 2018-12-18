@@ -16,6 +16,14 @@ RSpec.describe ElasticWhenever::Schedule do
       end
     end
 
+    context "when received verbose from cli" do
+      let(:schedule) { ElasticWhenever::Schedule.new((Pathname(__dir__) + "fixtures/schedule.rb").to_s, true, []) }
+
+      it "set verbose flag" do
+        expect(schedule.instance_variable_get(:@verbose)).to be true
+      end
+    end
+
     it "has tasks" do
       expect(schedule.tasks.count).to eq(2)
       expect(schedule.tasks[0]).to have_attributes(
