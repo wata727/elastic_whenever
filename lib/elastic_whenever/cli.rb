@@ -36,7 +36,6 @@ module ElasticWhenever
         ERROR_EXIT_CODE
       rescue OptionParser::MissingArgument,
         Option::InvalidOptionException,
-        Schedule::InvalidScheduleException,
         Task::Target::InvalidContainerException => exn
 
         Logger.instance.fail(exn.message)
@@ -47,10 +46,9 @@ module ElasticWhenever
 
       def update_tasks(option, dry_run:)
         schedule = Schedule.new(option.schedule_file, option.verbose, option.variables)
-        schedule.validate!
 
-        cluster = Task::Cluster.new(option, schedule.cluster)
-        definition = Task::Definition.new(option, schedule.task_definition)
+        cluster = Task::Cluster.new(option, option.cluster)
+        definition = Task::Definition.new(option, option.task_definition)
         role = Task::Role.new(option)
         if !role.exists? && !dry_run
           role.create
@@ -64,7 +62,7 @@ module ElasticWhenever
               option,
               cluster: cluster,
               definition: definition,
-              container: schedule.container,
+              container: option.container,
               commands: command,
               rule: rule,
               role: role,

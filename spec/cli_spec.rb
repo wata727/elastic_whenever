@@ -10,9 +10,6 @@ RSpec.describe ElasticWhenever::CLI do
     let(:schedule) do
       double(
         environment: "production",
-        cluster: "test",
-        task_definition: "wordpress:2",
-        container: "testContainer",
         chronic_options: {},
         tasks: [task]
       )
@@ -25,11 +22,20 @@ RSpec.describe ElasticWhenever::CLI do
       allow(ElasticWhenever::Task::Cluster).to receive(:new).with(kind_of(ElasticWhenever::Option), "test").and_return(cluster)
       allow(ElasticWhenever::Task::Definition).to receive(:new).with(kind_of(ElasticWhenever::Option), "wordpress:2").and_return(definition)
       allow(ElasticWhenever::Task::Role).to receive(:new).with(kind_of(ElasticWhenever::Option)).and_return(role)
-      allow(schedule).to receive(:validate!)
       allow(role).to receive(:exists?).and_return(false)
     end
 
     context "with dry run mode" do
+      let(:args) do
+        %W(
+          --region us-east-1
+          -f #{Pathname(__dir__) + "fixtures/schedule.rb"}
+          --cluster test
+          --task-definition wordpress:2
+          --container testContainer
+        )
+      end
+
       it "updates tasks with dry run" do
         expect(role).not_to receive(:create)
         expect(ElasticWhenever::CLI).not_to receive(:clear_tasks)
@@ -37,7 +43,7 @@ RSpec.describe ElasticWhenever::CLI do
         expect_any_instance_of(ElasticWhenever::Task::Target).not_to receive(:create)
 
         expect {
-          ElasticWhenever::CLI.run(%W(--region us-east-1 -f #{(Pathname(__dir__) + "fixtures/schedule.rb").to_s}))
+          ElasticWhenever::CLI.run(args)
         }.to output(<<~OUTPUT).to_stdout
           cron(0 0 * * ? *) test wordpress:2 testContainer bundle exec bin/rails runner -e production Hoge.run
 
@@ -47,19 +53,22 @@ RSpec.describe ElasticWhenever::CLI do
       end
 
       it "retruns success status code" do
-        expect(ElasticWhenever::CLI.run(%W(--region us-east-1 -f #{(Pathname(__dir__) + "fixtures/schedule.rb").to_s}))).to eq ElasticWhenever::CLI::SUCCESS_EXIT_CODE
-      end
-
-      context "when validation is failed" do
-        before { allow(schedule).to receive(:validate!).and_raise(ElasticWhenever::Schedule::InvalidScheduleException) }
-
-        it "returns error status code" do
-          expect(ElasticWhenever::CLI.run(%W(--region us-east-1 -f #{(Pathname(__dir__) + "fixtures/schedule.rb").to_s}))).to eq ElasticWhenever::CLI::ERROR_EXIT_CODE
-        end
+        expect(ElasticWhenever::CLI.run(args)).to eq ElasticWhenever::CLI::SUCCESS_EXIT_CODE
       end
     end
 
     context "with update mode" do
+      let(:args) do
+        %W(
+          -i test
+          --region us-east-1
+          -f #{Pathname(__dir__) + "fixtures/schedule.rb"}
+          --cluster test
+          --task-definition wordpress:2
+          --container testContainer
+        )
+      end
+
       before do
         allow(role).to receive(:create)
         allow(ElasticWhenever::CLI).to receive(:clear_tasks).with(kind_of(ElasticWhenever::Option))
@@ -73,32 +82,31 @@ RSpec.describe ElasticWhenever::CLI do
         expect_any_instance_of(ElasticWhenever::Task::Rule).to receive(:create)
         expect_any_instance_of(ElasticWhenever::Task::Target).to receive(:create)
 
-        expect(ElasticWhenever::CLI.run(%W(-i test --region us-east-1 -f #{(Pathname(__dir__) + "fixtures/schedule.rb").to_s}))).to eq ElasticWhenever::CLI::SUCCESS_EXIT_CODE
+        expect(ElasticWhenever::CLI.run(args)).to eq ElasticWhenever::CLI::SUCCESS_EXIT_CODE
       end
 
       it "receives schedule file name and variables" do
-        expect(ElasticWhenever::Schedule).to receive(:new).with((Pathname(__dir__) + "fixtures/schedule.rb").to_s, boolean, [{ key: "environment", value: "staging" }, { key: "cluster", value: "ecs-test" }])
+        expect(ElasticWhenever::Schedule).to receive(:new).with((Pathname(__dir__) + "fixtures/schedule.rb").to_s, boolean, [{ key: "environment", value: "staging" }, { key: "foo", value: "bar" }])
 
-        ElasticWhenever::CLI.run(%W(-i test --set environment=staging&cluster=ecs-test --region us-east-1 -f #{(Pathname(__dir__) + "fixtures/schedule.rb").to_s}))
-      end
-
-      context "when validation is failed" do
-        before { allow(schedule).to receive(:validate!).and_raise(ElasticWhenever::Schedule::InvalidScheduleException) }
-
-        it "returns error status code" do
-          expect(ElasticWhenever::CLI.run(%W(-i test --region us-east-1 -f #{(Pathname(__dir__) + "fixtures/schedule.rb").to_s}))).to eq ElasticWhenever::CLI::ERROR_EXIT_CODE
-        end
+        ElasticWhenever::CLI.run(args.concat(%W(--set environment=staging&foo=bar)))
       end
     end
 
     context "with clear mode" do
       let(:rule) { double("Rule") }
+      let(:args) do
+        %W(
+          -c test
+          --region us-east-1
+          -f #{Pathname(__dir__) + "fixtures/schedule.rb"}
+        )
+      end
 
       it "clear tasks" do
         expect(ElasticWhenever::Task::Rule).to receive(:fetch).with(kind_of(ElasticWhenever::Option)).and_return([rule])
         expect(rule).to receive(:delete)
 
-        expect(ElasticWhenever::CLI.run(%W(-c test --region us-east-1 -f #{(Pathname(__dir__) + "fixtures/schedule.rb").to_s}))).to eq ElasticWhenever::CLI::SUCCESS_EXIT_CODE
+        expect(ElasticWhenever::CLI.run(args)).to eq ElasticWhenever::CLI::SUCCESS_EXIT_CODE
       end
     end
 
@@ -112,6 +120,13 @@ RSpec.describe ElasticWhenever::CLI do
           commands: ["bundle", "exec", "bin/rails", "runner", "-e", "production", "Hoge.run"]
         )
       end
+      let(:args) do
+        %W(
+          -l test
+          --region us-east-1
+          -f #{Pathname(__dir__) + "fixtures/schedule.rb"}
+        )
+      end
 
       before do
         allow(ElasticWhenever::Task::Rule).to receive(:fetch).with(kind_of(ElasticWhenever::Option)).and_return([rule])
@@ -120,7 +135,7 @@ RSpec.describe ElasticWhenever::CLI do
 
       it "lists tasks" do
         expect {
-          ElasticWhenever::CLI.run(%W(-l test --region us-east-1 -f #{(Pathname(__dir__) + "fixtures/schedule.rb").to_s}))
+          ElasticWhenever::CLI.run(args)
         }.to output(<<~OUTPUT).to_stdout
           cron(0 0 * * ? *) test wordpress:2 testContainer bundle exec bin/rails runner -e production Hoge.run
 

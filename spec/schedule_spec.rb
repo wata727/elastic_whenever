@@ -5,12 +5,7 @@ RSpec.describe ElasticWhenever::Schedule do
 
   describe "#initialize" do
     it "has attributes" do
-      expect(schedule).to have_attributes(
-                            cluster: "ecs-test",
-                            task_definition: "example",
-                            container: "cron",
-                            chronic_options: {},
-                          )
+      expect(schedule).to have_attributes(chronic_options: {})
     end
 
     context "when received variables from cli" do
@@ -266,44 +261,14 @@ RSpec.describe ElasticWhenever::Schedule do
   describe "#set" do
     it "sets value" do
       expect {
-        schedule.set("container", "original")
-      }.to change { schedule.container }.from("cron").to("original")
+        schedule.set("foo", "bar")
+      }.to change { schedule.instance_variable_get("@foo") }.from(nil).to("bar")
     end
 
     it "doesnt set `tasks` value" do
       expect {
         schedule.set("tasks", "some value")
       }.not_to change { schedule.tasks }
-    end
-  end
-
-  describe "#validate!" do
-    it "doesnt raise exception" do
-      schedule.validate!
-    end
-
-    context "when doesnt set cluster" do
-      before { schedule.set("cluster", nil) }
-
-      it "raises exception" do
-        expect { schedule.validate! }.to raise_error(ElasticWhenever::Schedule::InvalidScheduleException, "You must set cluster")
-      end
-    end
-
-    context "when doesnt set task definition" do
-      before { schedule.set("task_definition", nil) }
-
-      it "raises exception" do
-        expect { schedule.validate! }.to raise_error(ElasticWhenever::Schedule::InvalidScheduleException, "You must set task definition")
-      end
-    end
-
-    context "when doesnt set container" do
-      before { schedule.set("container", nil) }
-
-      it "raises exception" do
-        expect { schedule.validate! }.to raise_error(ElasticWhenever::Schedule::InvalidScheduleException, "You must set container")
-      end
     end
   end
 

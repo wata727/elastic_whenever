@@ -3,7 +3,7 @@
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE.txt)
 [![Gem Version](https://badge.fury.io/rb/elastic_whenever.svg)](https://badge.fury.io/rb/elastic_whenever)
 
-Manage ECS scheduled tasks like whenever gem.
+Manage ECS scheduled tasks like [Whenever](https://github.com/javan/whenever) gem.
 
 ## Installation
 
@@ -23,7 +23,7 @@ Or install it yourself as:
 
 ## Usage
 
-You can use it almost like whenever :)
+You can use it almost like Whenever. However, please be aware that you must specify an identifier.
 
 ```
 $ elastic_whenever --help
@@ -31,7 +31,16 @@ Usage: elastic_whenever [options]
     -i, --update identifier          Clear and create scheduled tasks by schedule file
     -c, --clear identifier           Clear scheduled tasks
     -l, --list identifier            List scheduled tasks
-    -s, --set variables              Example: --set 'environment=staging&cluster=ecs-test'
+    -s, --set variables              Example: --set 'environment=staging'
+        --cluster cluster            ECS cluster to run tasks
+        --task-definition task_definition
+                                     Task definition name, If omit a revision, use the latest revision of the family automatically. Example: --task-deifinition oneoff-application:2
+        --container container        Container name defined in the task definition
+        --launch-type launch_type    Launch type. EC2 or FARGATE. Defualt: EC2
+        --assign-public-ip           Assign a public IP. Default: DISABLED (FARGATE only)
+        --security-groups groups     Example: --security-groups 'sg-2c503655,sg-72f0cb0a' (FARGATE only)
+        --subnets subnets            Example: --subnets 'subnet-4973d63f,subnet-45827d1d' (FARGATE only)
+        --platform-version version   Optionally specify the platform version. Default: LATEST (FARGATE only)
     -f, --file schedule_file         Default: config/schedule.rb
         --profile profile_name       AWS shared profile name
         --access-key aws_access_key_id
@@ -40,30 +49,13 @@ Usage: elastic_whenever [options]
                                      AWS secret access key
         --region region              AWS region
     -v, --version                    Print version
+    -V, --verbose                    Run rake jobs without --silent
 ```
 
-However, please be aware that you must specify an identifier. Also, you must specify the cluster, task definition and container name in schedule file.
-
-```ruby
-set :cluster, 'ecs-test' # ECS cluster name
-set :task_definition, 'oneoff-application:2' # Task definition name, If omit the revision, use the latest revision of family automatically.
-set :container, 'oneoff' # Container name of task definition
-
-every :day, at: '03:00am' do
-  runner 'Hoge.run'
-end
-```
-
-If you do not write it in the schedule file, specify it with arguments.
+NOTE: Currently, Elastic Whenever supports the Whenever syntax partially. We strongly encourage to use dry-run mode for verifying tasks to be created.
 
 ```
-$ elastic_whenever -i test --set 'environment=staging&cluster=ecs-test&task_definition=oneoff-application:2&container=oneoff'
-```
-
-NOTE: Currently, it supports only the syntax of whenever partially. We recommend to check what happens beforehand with the `elastic_whenever` command.
-
-```
-$ elastic_whenever
+$ elastic_whenever --cluster ecs-test --task-definition example:2 --container cron
 cron(0 3 * * ? *) ecs-test example:2 cron bundle exec rake hoge:run
 
 ## [message] Above is your schedule file converted to scheduled tasks; your scheduled tasks was not updated.
@@ -71,7 +63,7 @@ cron(0 3 * * ? *) ecs-test example:2 cron bundle exec rake hoge:run
 ```
 
 ## How it works
-Elastic Whenever creates CloudWatch Events as many as `every` block. The number of jobs declared in it corresponds to the target.
+Elastic Whenever creates CloudWatch Events as many as `every` block. Each event has as many targets as there are commands in the block.
 
 ```ruby
 every '0 0 * * *' do # scheduled task (identifier_68237a3b152a6c44359e1cf5cd8e7cf0def303d7)
@@ -80,20 +72,21 @@ every '0 0 * * *' do # scheduled task (identifier_68237a3b152a6c44359e1cf5cd8e7c
 end
 ```
 
-The name of the scheduled task is the identifier passed in CLI and the digest value calculated from the command etc.
-Because CloudWatch Events rule names are unique across all clusters, you should not use the same identifier across different clusters.
+The scheduled task's name is a digest value calculated from an identifier, commands, and so on.
+
+NOTE: You should not use the same identifier across different clusters because CloudWatch Events rule names are unique across all clusters.
 
 ## Compatible with Whenever
-### `job_type` method is not supported
-Whenever supports custom job type using `job_type` method, but Elastic Whenever does not support it.
+### `job_type`
+Whenever supports custom job type with `job_type` method, but Elastic Whenever doesn't support it.
 
 ```ruby
 # [warn] Skipping unsupported method: job_type
 job_type :awesome, '/usr/local/bin/awesome :task :fun_level'
 ```
 
-### `env` method is not supported
-Whenever supports environment variables using `env` method, but Elastic Whenever does not support it.
+### `env`
+Whenever supports environment variables with `env` method, but Elastic Whenever doesn't support it.
 You should use task definitions to set environment variables.
 
 ```ruby
@@ -101,16 +94,16 @@ You should use task definitions to set environment variables.
 env "VERSION", "v1"
 ```
 
-### `:job_template` option is not supported.
-Whenever has a template to describe as cron, but Elastic Whenever does not have the template.
+### `:job_template`
+Whenever has a template to describe as cron, but Elastic Whenever doesn't have the template.
 Therefore, `:job_template` option is ignored.
 
 ```ruby
 set :job_template, "/bin/zsh -l -c ':job'" # ignored
 ```
 
-### Behavior of frequency
-Elastic Whenever processes the frequency received by `every` block almost like whenever.
+### Frequency
+Elastic Whenever processes frequency passed to `every` block almost like Whenever.
 
 ```ruby
 # Whenever
@@ -134,7 +127,7 @@ every 10.minutes do
 end
 ```
 
-However, handling of the day of week is partially different because it follows the scheduled expression.
+However, handling of the day of week is partially different because it follows scheduled expression.
 
 ```ruby
 # Whenever
@@ -148,7 +141,7 @@ every :monday do
 end
 ```
 
-Therefore, the cron syntax is converted to scheduled tasks.
+Therefore, cron syntax is converted to scheduled expression like the following:
 
 ```ruby
 # cron(0 0 ? * 2 *) ecs-test myapp:2 web awesome
@@ -157,7 +150,7 @@ every "0 0 * * 1" do
 end
 ```
 
-Of course, you can write the scheduled expression.
+Absolutely, you can also write scheduled expression.
 
 ```ruby
 # cron(0 0 ? * 2 *) ecs-test myapp:2 web awesome
@@ -166,8 +159,8 @@ every "0 0 ? * 2 *" do
 end
 ```
 
-#### `:reboot` option is not supported
-Whenever supports `:reboot` which is a function of cron, but Elastic Whenever does not support it.
+#### `:reboot`
+Whenever supports `:reboot` as a cron option, but Elastic Whenever doesn't support it.
 
 ```ruby
 # [warn] `reboot` is not supported option. Ignore this task.
@@ -176,9 +169,9 @@ every :reboot do
 end
 ```
 
-### Behavior of bundle commands
-Whenever checks if the application uses bundler and automatically adds the prefix to commands.
-However, Elastic Whenever always adds the prefix on the premise that the application is using bundler.
+### Bundle commands
+Whenever checks if the application uses bundler and automatically adds a prefix to commands.
+However, Elastic Whenever always adds a prefix on a premise that the application is using bundler.
 
 ```ruby
 # Whenever
@@ -197,8 +190,8 @@ If you don't want to add the prefix, set `bundle_command` to empty as follows:
 set :bundle_command, ""
 ```
 
-### Drop support for for Rails 3 or below
-Whenever supports `runner` job with old Rails version, but Elastic Whenever supports Rails 4 and above only.
+### Rails
+Whenever supports `runner` job with old Rails versions, but Elastic Whenever supports Rails 4 and above only.
 
 ```ruby
 # Whenever
