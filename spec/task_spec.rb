@@ -30,6 +30,15 @@ RSpec.describe ElasticWhenever::Task do
         expect(task.commands).to eq([%w(rake hoge:run --silent)])
       end
     end
+
+    context "when set verbose flag" do
+      let(:task) { ElasticWhenever::Task.new("production", true, "bundle exec", "cron(0 17 * * ? *)") }
+
+      it "generates rake commands" do
+        task.rake("hoge:run")
+        expect(task.commands).to eq([%w(bundle exec rake hoge:run)])
+      end
+    end
   end
 
   describe "#runner" do
