@@ -1,3 +1,32 @@
+## v0.4.0 (2018-12-19)
+
+Elastic Whenever now supports Fargate launch type. Thanks @avinson.
+
+From this release, ECS parameters must be passed as arguments. Previously, it supported schedule file variables, but it will be ignored.
+
+```
+# Before
+$ elastic_whenever --set 'cluster=ecs-test&task_definition=oneoff-application:2&container=oneoff'
+
+# After
+$ elastic_whenever --cluster ecs-test --task-definition oneoff-application:2 --container oneoff
+```
+
+### Enhancements
+
+- update elastic_whenever for FARGATE launch type ([#34](https://github.com/wata727/elastic_whenever/pull/34))
+
+### Changes
+
+- Bump aws-sdk-cloudwatchevents dependency ([#36](https://github.com/wata727/elastic_whenever/pull/36))
+- Pass ECS params as an argument ([#37](https://github.com/wata727/elastic_whenever/pull/37))
+
+### Chore
+
+- CI against Ruby 2.4.5 and 2.5.3 ([#35](https://github.com/wata727/elastic_whenever/pull/35))
+- Set nil as verbose mode ([#38](https://github.com/wata727/elastic_whenever/pull/38))
+- Revise task's target ([#39](https://github.com/wata727/elastic_whenever/pull/39))
+
 ## v0.3.2 (2018-06-25)
 
 ### BugFix
