@@ -100,5 +100,62 @@ RSpec.describe ElasticWhenever::Task::Target do
         role: role,
       ).create
     end
+
+    context "when FARGATE launch type" do
+      let(:option) do
+        ElasticWhenever::Option.new(%w(
+          -i test
+          --launch-type FARGATE
+          --platform-version LATEST
+          --subnets subnet-4973d63f,subnet-45827d1d
+          --security-groups sg-2c503655,sg-72f0cb0a
+          --assign-public-ip
+        ))
+      end
+
+      it "creates target" do
+        expect(client).to receive(:put_targets).with(
+          rule: "test_rule",
+          targets: [
+            {
+              id: "26d98175755bb458e8ba55a1f5cfb2dc0e10dd81",
+              arn: "arn:aws:ecs:us-east-1:123456789:cluster/test",
+              input: {
+                containerOverrides: [
+                  {
+                    name: "testContainer",
+                    command: ["bundle", "exec", "rake", "spec"]
+                  }
+                ]
+              }.to_json,
+              role_arn: "arn:aws:ecs:us-east-1:123456789:role/testRole",
+              ecs_parameters: {
+                launch_type: "FARGATE",
+                task_definition_arn: "arn:aws:ecs:us-east-1:123456789:task-definition/wordpress:2",
+                task_count: 1,
+                network_configuration: {
+                  awsvpc_configuration: {
+                    subnets: ["subnet-4973d63f", "subnet-45827d1d"],
+                    security_groups: ["sg-2c503655", "sg-72f0cb0a"],
+                    assign_public_ip: "ENABLED",
+                  }
+                },
+                platform_version: "LATEST",
+              }
+            }
+          ]
+        )
+
+        ElasticWhenever::Task::Target.new(
+          option,
+          cluster: cluster,
+          definition: definition,
+          container: "testContainer",
+          commands: ["bundle", "exec", "rake", "spec"],
+          rule: rule,
+          role: role,
+        ).create
+      end
+    end
   end
 end

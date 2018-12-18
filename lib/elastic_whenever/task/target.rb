@@ -51,49 +51,18 @@ module ElasticWhenever
       end
 
       def create
-        if launch_type == 'FARGATE'
-          client.put_targets(
-            rule: rule.name,
-            targets: [
-              {
-                id: Digest::SHA1.hexdigest(commands.join("-")),
-                arn: cluster.arn,
-                input: input_json(container, commands),
-                role_arn: role.arn,
-                ecs_parameters: {
-                  launch_type: launch_type,
-                  task_definition_arn: definition.arn,
-                  task_count: 1,
-                  network_configuration: {
-                    awsvpc_configuration: {
-                      subnets: subnets.split(','),
-                      security_groups: security_groups.split(','),
-                      assign_public_ip: assign_public_ip,
-                    }
-                  },
-                  platform_version: platform_version
-                }
-              }
-            ]
-          )
-        else
-          client.put_targets(
-            rule: rule.name,
-            targets: [
-              {
-                id: Digest::SHA1.hexdigest(commands.join("-")),
-                arn: cluster.arn,
-                input: input_json(container, commands),
-                role_arn: role.arn,
-                ecs_parameters: {
-                  launch_type: launch_type,
-                  task_definition_arn: definition.arn,
-                  task_count: 1,
-                }
-              }
-            ]
-          )
-        end
+        client.put_targets(
+          rule: rule.name,
+          targets: [
+            {
+              id: Digest::SHA1.hexdigest(commands.join("-")),
+              arn: cluster.arn,
+              input: input_json(container, commands),
+              role_arn: role.arn,
+              ecs_parameters: ecs_parameters,
+            }
+          ]
+        )
       end
 
       private
@@ -107,6 +76,30 @@ module ElasticWhenever
             }
           ]
         }.to_json
+      end
+
+      def ecs_parameters
+        if launch_type == "FARGATE"
+          {
+            launch_type: launch_type,
+            task_definition_arn: definition.arn,
+            task_count: 1,
+            network_configuration: {
+              awsvpc_configuration: {
+                subnets: subnets,
+                security_groups: security_groups,
+                assign_public_ip: assign_public_ip,
+              }
+            },
+            platform_version: platform_version,
+          }
+        else
+          {
+            launch_type: launch_type,
+            task_definition_arn: definition.arn,
+            task_count: 1,
+          }
+        end
       end
 
       attr_reader :rule

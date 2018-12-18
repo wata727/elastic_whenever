@@ -33,8 +33,8 @@ module ElasticWhenever
       @assign_public_ip = 'DISABLED'
       @launch_type = 'EC2'
       @platform_version = 'LATEST'
-      @security_groups = nil
-      @subnets = nil
+      @security_groups = []
+      @subnets = []
       @schedule_file = 'config/schedule.rb'
       @profile = nil
       @access_key = nil
@@ -81,10 +81,10 @@ module ElasticWhenever
           @assign_public_ip = 'ENABLED'
         end
         opts.on('--security-groups groups', "Example: --security-groups 'sg-2c503655,sg-72f0cb0a' (FARGATE only)") do |groups|
-          @security_groups = groups
+          @security_groups = groups.split(',')
         end
         opts.on('--subnets subnets', "Example: --subnets 'subnet-4973d63f,subnet-45827d1d' (FARGATE only)") do |subnets|
-          @subnets = subnets
+          @subnets = subnets.split(',')
         end
         opts.on('--platform-version version', "Optionally specify the platform version. Default: LATEST (FARGATE only)") do |version|
           @platform_version = version

@@ -11,6 +11,8 @@ RSpec.describe ElasticWhenever::Option do
                                                     launch_type: 'EC2',
                                                     platform_version: 'LATEST',
                                                     variables: [],
+                                                    subnets: [],
+                                                    security_groups: [],
                                                     schedule_file: "config/schedule.rb"
                                                   )
     end
@@ -41,6 +43,8 @@ RSpec.describe ElasticWhenever::Option do
           { key: "environment", value: "staging" },
           { key: "foo", value: "bar" },
         ],
+        subnets: ["subnet-4973d63f", "subnet-45827d1d"],
+        security_groups: ["sg-2c503655", "sg-72f0cb0a"],
         schedule_file: "custom_schedule.rb"
       )
     end
