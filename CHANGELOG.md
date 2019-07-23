@@ -1,3 +1,13 @@
+## v0.4.1 (2019-07-23)
+
+### BugFixes
+
+- Retry for concurrent modification ([#41](https://github.com/wata727/elastic_whenever/pull/41))
+
+### Chore
+
+- CI against Ruby 2.6 ([#40](https://github.com/wata727/elastic_whenever/pull/40))
+
 ## v0.4.0 (2018-12-19)
 
 Elastic Whenever now supports Fargate launch type. Thanks @avinson.
