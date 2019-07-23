@@ -14,10 +14,14 @@ module ElasticWhenever
           Logger.instance.message("Run `elastic_whenever --help' for more options.")
         when Option::UPDATE_MODE
           option.validate!
-          update_tasks(option, dry_run: false)
+          with_concurrent_modification_handling do
+            update_tasks(option, dry_run: false)
+          end
           Logger.instance.log("write", "scheduled tasks updated")
         when Option::CLEAR_MODE
-          clear_tasks(option)
+          with_concurrent_modification_handling do
+            clear_tasks(option)
+          end
           Logger.instance.log("write", "shceduled tasks cleared")
         when Option::LIST_MODE
           list_tasks(option)
@@ -102,6 +106,19 @@ module ElasticWhenever
         targets.each do |target|
           puts "#{rule.expression} #{target.cluster.name} #{target.definition.name} #{target.container} #{target.commands.join(" ")}"
           puts
+        end
+      end
+
+      def with_concurrent_modification_handling
+        Retryable.retryable(
+          tries: 5,
+          on: Aws::CloudWatchEvents::Errors::ConcurrentModificationException,
+          sleep: lambda { |_n| rand(1..10) },
+        ) do |retries, exn|
+          if retries > 0
+            Logger.instance.warn("concurrent modification detected; Retrying...")
+          end
+          yield
         end
       end
     end
