@@ -22,7 +22,7 @@ module ElasticWhenever
           with_concurrent_modification_handling do
             clear_tasks(option)
           end
-          Logger.instance.log("write", "shceduled tasks cleared")
+          Logger.instance.log("write", "scheduled tasks cleared")
         when Option::LIST_MODE
           list_tasks(option)
           Logger.instance.message("Above is your scheduled tasks.")
