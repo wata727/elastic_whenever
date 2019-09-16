@@ -20,7 +20,7 @@ module ElasticWhenever
       def self.convert(option, task)
         self.new(
           option,
-          name: rule_name(option.identifier, task.commands),
+          name: rule_name(option.identifier, task.expression, task.commands),
           expression: task.expression
         )
       end
@@ -47,8 +47,8 @@ module ElasticWhenever
 
       private
 
-      def self.rule_name(identifier, commands)
-        "#{identifier}_#{Digest::SHA1.hexdigest(commands.map { |command| command.join("-") }.join("-"))}"
+      def self.rule_name(identifier, expression, commands)
+        "#{identifier}_#{Digest::SHA1.hexdigest([expression, commands.map { |command| command.join("-") }.join("-")].join("-"))}"
       end
 
       attr_reader :client
