@@ -23,7 +23,7 @@ RSpec.describe ElasticWhenever::Task::Rule do
       task.rake "hoge:run"
 
       expect(ElasticWhenever::Task::Rule.convert(option, task)).to have_attributes(
-                                                                     name: "test_b7ae861e5b0deb3dde12c9a65a179fad6ad36018",
+                                                                     name: "test_9bd25c94ceb04edcaa64946e7ed84f13644d655f",
                                                                      expression: "cron(0 0 * * ? *)"
                                                                    )
     end
