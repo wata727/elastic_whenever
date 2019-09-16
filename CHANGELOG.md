@@ -1,3 +1,13 @@
+## v0.4.2 (2019-09-17)
+
+### BugFixes
+
+- [#43](https://github.com/wata727/elastic_whenever/pull/43): Add expression to task rule name hash computation ([@korbin](https://github.com/korbin))
+
+### Chore
+
+- [#42](https://github.com/wata727/elastic_whenever/pull/42): Fix typo in clear task log line ([@HistoireDeBabar](https://github.com/HistoireDeBabar))
+
 ## v0.4.1 (2019-07-23)
 
 ### BugFixes
