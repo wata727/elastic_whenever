@@ -13,7 +13,8 @@ RSpec.describe ElasticWhenever::Option do
                                                     variables: [],
                                                     subnets: [],
                                                     security_groups: [],
-                                                    schedule_file: "config/schedule.rb"
+                                                    schedule_file: "config/schedule.rb",
+                                                    iam_role: "ecsEventsRole",
                                                   )
     end
 
@@ -45,7 +46,8 @@ RSpec.describe ElasticWhenever::Option do
         ],
         subnets: ["subnet-4973d63f", "subnet-45827d1d"],
         security_groups: ["sg-2c503655", "sg-72f0cb0a"],
-        schedule_file: "custom_schedule.rb"
+        schedule_file: "custom_schedule.rb",
+        iam_role: "ecsEventsRole",
       )
     end
 

@@ -19,6 +19,7 @@ module ElasticWhenever
     attr_reader :security_groups
     attr_reader :subnets
     attr_reader :schedule_file
+    attr_reader :iam_role
 
     class InvalidOptionException < StandardError; end
 
@@ -36,6 +37,7 @@ module ElasticWhenever
       @security_groups = []
       @subnets = []
       @schedule_file = 'config/schedule.rb'
+      @iam_role = 'ecsEventsRole'
       @profile = nil
       @access_key = nil
       @secret_key = nil
@@ -91,6 +93,9 @@ module ElasticWhenever
         end
         opts.on('-f', '--file schedule_file', 'Default: config/schedule.rb') do |file|
           @schedule_file = file
+        end
+        opts.on('--iam-role name', 'IAM role name used by CloudWatch Events. Default: ecsEventsRole') do |role|
+          @iam_role = role
         end
         opts.on('--profile profile_name', 'AWS shared profile name') do |profile|
           @profile = profile

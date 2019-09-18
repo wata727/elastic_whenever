@@ -42,6 +42,7 @@ Usage: elastic_whenever [options]
         --subnets subnets            Example: --subnets 'subnet-4973d63f,subnet-45827d1d' (FARGATE only)
         --platform-version version   Optionally specify the platform version. Default: LATEST (FARGATE only)
     -f, --file schedule_file         Default: config/schedule.rb
+        --iam-role name              IAM role name used by CloudWatch Events. Default: ecsEventsRole
         --profile profile_name       AWS shared profile name
         --access-key aws_access_key_id
                                      AWS access key ID

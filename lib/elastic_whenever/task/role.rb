@@ -1,17 +1,16 @@
 module ElasticWhenever
   class Task
     class Role
-      NAME = "ecsEventsRole"
-
       def initialize(option)
         client = Aws::IAM::Client.new(option.aws_config)
         @resource = Aws::IAM::Resource.new(client: client)
-        @role = resource.role(NAME)
+        @role_name = option.iam_role
+        @role = resource.role(@role_name)
       end
 
       def create
         @role = resource.create_role(
-          role_name: NAME,
+          role_name: @role_name,
           assume_role_policy_document: role_json,
         )
         role.attach_policy(
