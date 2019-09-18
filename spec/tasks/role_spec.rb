@@ -3,23 +3,33 @@ require "spec_helper"
 RSpec.describe ElasticWhenever::Task::Role do
   let(:resource) { double("resource") }
   let(:option) { ElasticWhenever::Option.new(%w(--region us-east-1)) }
-  let(:role) { double(arn: "arn:aws:iam::123456789:role/ecsEventsRole") }
+  let(:role_name) { "ecsEventsRole" }
+  let(:role) { double(arn: "arn:aws:iam::123456789:role/#{role_name}") }
 
   before do
     allow(Aws::IAM::Resource).to receive(:new).and_return(resource)
-    allow(resource).to receive(:role).with(ElasticWhenever::Task::Role::NAME).and_return(role)
+    allow(resource).to receive(:role).with(role_name).and_return(role)
   end
 
   describe "#initialize" do
     it "has role" do
       expect(ElasticWhenever::Task::Role.new(option)).to have_attributes(arn: "arn:aws:iam::123456789:role/ecsEventsRole")
     end
+
+    context "with custom role name" do
+      let(:role_name) { "cloudwatch-events-ecs" }
+      let(:option) { ElasticWhenever::Option.new(%w(--region us-east-1 --iam-role cloudwatch-events-ecs)) }
+
+      it "has role" do
+        expect(ElasticWhenever::Task::Role.new(option)).to have_attributes(arn: "arn:aws:iam::123456789:role/cloudwatch-events-ecs")
+      end
+    end
   end
 
   describe "#create" do
     it "creates IAM role" do
       expect(resource).to receive(:create_role).with({
-                                                       role_name: ElasticWhenever::Task::Role::NAME,
+                                                       role_name: role_name,
                                                        assume_role_policy_document: {
                                                          Version: "2012-10-17",
                                                          Statement: [
