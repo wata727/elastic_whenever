@@ -1,3 +1,9 @@
+## v0.5.0 (2019-09-19)
+
+### Enhancements
+
+- [#44](https://github.com/wata727/elastic_whenever/pull/44): Make CloudWatch Events IAM role name configurable ([@domcleal](https://github.com/domcleal))
+
 ## v0.4.2 (2019-09-17)
 
 ### BugFixes
