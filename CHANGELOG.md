@@ -1,3 +1,9 @@
+## v0.5.1 (2019-10-09)
+
+### Enhancements
+
+- [#45](https://github.com/wata727/elastic_whenever/pull/45): Add description to CloudWatch rule ([@tobscher](https://github.com/tobscher))
+
 ## v0.5.0 (2019-09-19)
 
 ### Enhancements
