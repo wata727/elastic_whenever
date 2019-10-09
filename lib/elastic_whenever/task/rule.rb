@@ -28,7 +28,7 @@ module ElasticWhenever
         )
       end
 
-      def initialize(option, name:, expression:, description: "")
+      def initialize(option, name:, expression:, description:)
         @name = name
         @expression = expression
         @description = description

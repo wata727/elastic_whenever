@@ -47,7 +47,7 @@ RSpec.describe ElasticWhenever::Task::Rule do
     it "remove rule and targets" do
       expect(client).to receive(:remove_targets).with(rule: "example", ids: ["example_id"])
       expect(client).to receive(:delete_rule).with(name: "example")
-      ElasticWhenever::Task::Rule.new(option, name: "example", expression: "cron(0 0 * * ? *)").delete
+      ElasticWhenever::Task::Rule.new(option, name: "example", expression: "cron(0 0 * * ? *)", description: "test").delete
     end
   end
 end
