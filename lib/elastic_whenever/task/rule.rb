@@ -3,6 +3,7 @@ module ElasticWhenever
     class Rule
       attr_reader :name
       attr_reader :expression
+      attr_reader :description
 
       class UnsupportedOptionException < StandardError; end
 
@@ -13,6 +14,7 @@ module ElasticWhenever
             option,
             name: rule.name,
             expression: rule.schedule_expression,
+            description: rule.description
           )
         end
       end
@@ -21,13 +23,15 @@ module ElasticWhenever
         self.new(
           option,
           name: rule_name(option.identifier, task.expression, task.commands),
-          expression: task.expression
+          expression: task.expression,
+          description: rule_description(option.identifier, task.expression, task.commands)
         )
       end
 
-      def initialize(option, name:, expression:)
+      def initialize(option, name:, expression:, description:)
         @name = name
         @expression = expression
+        @description = description
         @client = Aws::CloudWatchEvents::Client.new(option.aws_config)
       end
 
@@ -35,6 +39,8 @@ module ElasticWhenever
         client.put_rule(
           name: name,
           schedule_expression: expression,
+          # See https://docs.aws.amazon.com/eventbridge/latest/APIReference/API_PutRule.html#API_PutRule_RequestSyntax
+          description: truncate(description, 512),
           state: "ENABLED",
         )
       end
@@ -49,6 +55,14 @@ module ElasticWhenever
 
       def self.rule_name(identifier, expression, commands)
         "#{identifier}_#{Digest::SHA1.hexdigest([expression, commands.map { |command| command.join("-") }.join("-")].join("-"))}"
+      end
+
+      def self.rule_description(identifier, expression, commands)
+        "#{identifier} - #{expression} - #{commands.map { |command| command.join(" ") }.join(" - ")}"
+      end
+
+      def truncate(string, max)
+        string.length > max ? string[0...max] : string
       end
 
       attr_reader :client
