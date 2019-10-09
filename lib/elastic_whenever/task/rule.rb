@@ -39,7 +39,8 @@ module ElasticWhenever
         client.put_rule(
           name: name,
           schedule_expression: expression,
-          description: description,
+          # See https://docs.aws.amazon.com/eventbridge/latest/APIReference/API_PutRule.html#API_PutRule_RequestSyntax
+          description: truncate(description, 512),
           state: "ENABLED",
         )
       end
@@ -58,6 +59,10 @@ module ElasticWhenever
 
       def self.rule_description(identifier, expression, commands)
         "#{identifier} - #{expression} - #{commands.map { |command| command.join(" ") }.join(" - ")}"
+      end
+
+      def truncate(string, max)
+        string.length > max ? string[0...max] : string
       end
 
       attr_reader :client

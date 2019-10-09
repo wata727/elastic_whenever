@@ -36,6 +36,11 @@ RSpec.describe ElasticWhenever::Task::Rule do
       expect(client).to receive(:put_rule).with(name: "example", schedule_expression: "cron(0 0 * * ? *)", description: "test", state: "ENABLED")
       ElasticWhenever::Task::Rule.new(option, name: "example", expression: "cron(0 0 * * ? *)", description: "test").create
     end
+
+    it "truncates the description at 512 characters" do
+      expect(client).to receive(:put_rule).with(name: "example", schedule_expression: "cron(0 0 * * ? *)", description: "a" * 512, state: "ENABLED")
+      ElasticWhenever::Task::Rule.new(option, name: "example", expression: "cron(0 0 * * ? *)", description: "a" * 600).create
+    end
   end
 
   describe "#delete" do
