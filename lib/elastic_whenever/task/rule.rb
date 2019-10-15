@@ -1,6 +1,7 @@
 module ElasticWhenever
   class Task
     class Rule
+      attr_reader :option
       attr_reader :name
       attr_reader :expression
       attr_reader :description
@@ -29,6 +30,7 @@ module ElasticWhenever
       end
 
       def initialize(option, name:, expression:, description:)
+        @option = option
         @name = name
         @expression = expression
         @description = description
@@ -36,12 +38,12 @@ module ElasticWhenever
       end
 
       def create
+        # See https://docs.aws.amazon.com/eventbridge/latest/APIReference/API_PutRule.html#API_PutRule_RequestSyntax
         client.put_rule(
           name: name,
           schedule_expression: expression,
-          # See https://docs.aws.amazon.com/eventbridge/latest/APIReference/API_PutRule.html#API_PutRule_RequestSyntax
           description: truncate(description, 512),
-          state: "ENABLED",
+          state: option.rule_state,
         )
       end
 

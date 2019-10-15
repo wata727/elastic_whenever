@@ -15,6 +15,7 @@ RSpec.describe ElasticWhenever::Option do
                                                     security_groups: [],
                                                     schedule_file: "config/schedule.rb",
                                                     iam_role: "ecsEventsRole",
+                                                    rule_state: "ENABLED"
                                                   )
     end
 
@@ -32,6 +33,7 @@ RSpec.describe ElasticWhenever::Option do
           --subnets subnet-4973d63f,subnet-45827d1d
           --platform-version 1.1.0
           --verbose
+          --rule_state DISABLED
         ))
       ).to have_attributes(
         identifier: nil,
@@ -48,6 +50,7 @@ RSpec.describe ElasticWhenever::Option do
         security_groups: ["sg-2c503655", "sg-72f0cb0a"],
         schedule_file: "custom_schedule.rb",
         iam_role: "ecsEventsRole",
+        rule_state: "DISABLED"
       )
     end
 
@@ -154,6 +157,18 @@ RSpec.describe ElasticWhenever::Option do
           --task-definition wordpress:2
         )).validate! 
       }.to raise_error(ElasticWhenever::Option::InvalidOptionException, "You must set container")
+    end
+
+    it "raises an exception if the rule state is invalid" do
+      expect {
+        ElasticWhenever::Option.new(%W(
+          -f #{Pathname(__dir__) + "fixtures/schedule.rb"}
+          --cluster test
+          --task-definition wordpress:2
+          --container testContainer
+          --rule-state FOO
+        )).validate!
+      }.to raise_error(ElasticWhenever::Option::InvalidOptionException, "Invalid rule state. Possible values are ENABLED, DISABLED")
     end
 
     it "doesn't raise exception" do
