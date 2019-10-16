@@ -43,6 +43,7 @@ Usage: elastic_whenever [options]
         --platform-version version   Optionally specify the platform version. Default: LATEST (FARGATE only)
     -f, --file schedule_file         Default: config/schedule.rb
         --iam-role name              IAM role name used by CloudWatch Events. Default: ecsEventsRole
+        --rule-state state           The state of the CloudWatch Events Rule (ENABLED or DISABLED), default: ENABLED
         --profile profile_name       AWS shared profile name
         --access-key aws_access_key_id
                                      AWS access key ID

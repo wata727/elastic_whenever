@@ -41,6 +41,15 @@ RSpec.describe ElasticWhenever::Task::Rule do
       expect(client).to receive(:put_rule).with(name: "example", schedule_expression: "cron(0 0 * * ? *)", description: "a" * 512, state: "ENABLED")
       ElasticWhenever::Task::Rule.new(option, name: "example", expression: "cron(0 0 * * ? *)", description: "a" * 600).create
     end
+
+    context "with custom rule state" do
+      let(:option) { ElasticWhenever::Option.new(%w(-i test --rule-state DISABLED)) }
+
+      it "uses the rule state when creating the rule" do
+        expect(client).to receive(:put_rule).with(name: "example", schedule_expression: "cron(0 0 * * ? *)", description: "test", state: "DISABLED")
+        ElasticWhenever::Task::Rule.new(option, name: "example", expression: "cron(0 0 * * ? *)", description: "test").create
+      end
+    end
   end
 
   describe "#delete" do

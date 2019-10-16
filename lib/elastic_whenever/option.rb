@@ -1,5 +1,7 @@
 module ElasticWhenever
   class Option
+    POSSIBLE_RULE_STATES = %w[ENABLED DISABLED].freeze
+
     DRYRUN_MODE = 1
     UPDATE_MODE = 2
     CLEAR_MODE = 3
@@ -20,6 +22,7 @@ module ElasticWhenever
     attr_reader :subnets
     attr_reader :schedule_file
     attr_reader :iam_role
+    attr_reader :rule_state
 
     class InvalidOptionException < StandardError; end
 
@@ -38,6 +41,7 @@ module ElasticWhenever
       @subnets = []
       @schedule_file = 'config/schedule.rb'
       @iam_role = 'ecsEventsRole'
+      @rule_state = 'ENABLED'
       @profile = nil
       @access_key = nil
       @secret_key = nil
@@ -97,6 +101,9 @@ module ElasticWhenever
         opts.on('--iam-role name', 'IAM role name used by CloudWatch Events. Default: ecsEventsRole') do |role|
           @iam_role = role
         end
+        opts.on('--rule-state state', 'The state of the CloudWatch Events Rule. Default: ENABLED') do |state|
+          @rule_state = state
+        end
         opts.on('--profile profile_name', 'AWS shared profile name') do |profile|
           @profile = profile
         end
@@ -133,6 +140,7 @@ module ElasticWhenever
       raise InvalidOptionException.new("You must set cluster") unless cluster
       raise InvalidOptionException.new("You must set task definition") unless task_definition
       raise InvalidOptionException.new("You must set container") unless container
+      raise InvalidOptionException.new("Invalid rule state. Possible values are #{POSSIBLE_RULE_STATES.join(", ")}") unless POSSIBLE_RULE_STATES.include?(rule_state)
     end
 
     private
