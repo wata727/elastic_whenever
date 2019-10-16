@@ -1,3 +1,9 @@
+## v0.6.0 (2019-10-16)
+
+### Enhancements
+
+- [#46](https://github.com/wata727/elastic_whenever/pull/46): Add option to disable rule ([@tobscher](https://github.com/tobscher))
+
 ## v0.5.1 (2019-10-09)
 
 ### Enhancements
