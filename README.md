@@ -104,6 +104,23 @@ Therefore, `:job_template` option is ignored.
 set :job_template, "/bin/zsh -l -c ':job'" # ignored
 ```
 
+### Setting variables
+Elastic Whenever supports also setting variables via the `--set` option [as Whenever does](https://github.com/javan/whenever/wiki/Setting-variables-on-the-fly).
+
+Example:
+
+`elastic_whenever --set 'environment=staging&some_var=foo'`
+
+```ruby
+@environment
+#=> "staging"
+
+@some_var
+#=> "foo"
+```
+
+Especially, `@environment` defaults to `"production"`.
+
 ### Frequency
 Elastic Whenever processes frequency passed to `every` block almost like Whenever.
 
