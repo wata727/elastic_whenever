@@ -9,7 +9,7 @@ module ElasticWhenever
       class UnsupportedOptionException < StandardError; end
 
       def self.fetch(option)
-        client = Aws::CloudWatchEvents::Client.new(options.aws_config)
+        client = Aws::CloudWatchEvents::Client.new(option.aws_config)
         client.list_rules(name_prefix: option.identifier).rules.map do |rule|
           self.new(
             option,
