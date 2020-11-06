@@ -1,3 +1,9 @@
+## v0.6.1 (2020-11-06)
+
+### BugFixes
+
+- [#51](https://github.com/wata727/elastic_whenever/pull/51): Avoid hitting rate limits fetching credentials when running under ECS or with an IAM profile  ([@stevenwilliamson](https://github.com/stevenwilliamson))
+
 ## v0.6.0 (2019-10-16)
 
 ### Enhancements
