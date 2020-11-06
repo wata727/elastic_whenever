@@ -36,7 +36,6 @@ module ElasticWhenever
         @expression = expression
         @description = description
         if client != nil
-          puts("using cached client")
           @client = client
         else
           @client = Aws::CloudWatchEvents::Client.new(option.aws_config)
