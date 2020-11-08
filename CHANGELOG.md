@@ -1,8 +1,12 @@
-## v0.6.1 (2020-11-06)
+## v0.6.1 (2020-11-08)
 
 ### BugFixes
 
 - [#51](https://github.com/wata727/elastic_whenever/pull/51): Avoid hitting rate limits fetching credentials when running under ECS or with an IAM profile  ([@stevenwilliamson](https://github.com/stevenwilliamson))
+
+### Chores
+
+- [#53](https://github.com/wata727/elastic_whenever/pull/53): Migrate CI to GitHub Actions from Travis CI
 
 ## v0.6.0 (2019-10-16)
 
