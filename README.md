@@ -1,5 +1,5 @@
 # Elastic Whenever
-[![Build Status](https://travis-ci.org/wata727/elastic_whenever.svg?branch=master)](https://travis-ci.org/wata727/elastic_whenever)
+[![Build Status](https://github.com/wata727/elastic_whenever/workflows/build/badge.svg?branch=master)](https://github.com/wata727/elastic_whenever/actions)
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE.txt)
 [![Gem Version](https://badge.fury.io/rb/elastic_whenever.svg)](https://badge.fury.io/rb/elastic_whenever)
 
