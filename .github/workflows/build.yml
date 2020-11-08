@@ -1,0 +1,30 @@
+name: build
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  spec:
+    name: Ruby ${{ matrix.ruby_version }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ruby_version: ['2.5.x', '2.6.x', '2.7.x']
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Ruby ${{ matrix.ruby_version }}
+      uses: actions/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby_version }}
+    - name: Run spec
+      run: |
+        gem install bundler
+        bundle install --jobs 4 --retry 3
+        bundle exec rake
