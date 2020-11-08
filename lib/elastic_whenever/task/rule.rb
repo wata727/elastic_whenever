@@ -15,7 +15,8 @@ module ElasticWhenever
             option,
             name: rule.name,
             expression: rule.schedule_expression,
-            description: rule.description
+            description: rule.description,
+            client: client
           )
         end
       end
@@ -29,12 +30,16 @@ module ElasticWhenever
         )
       end
 
-      def initialize(option, name:, expression:, description:)
+      def initialize(option, name:, expression:, description:, client: nil)
         @option = option
         @name = name
         @expression = expression
         @description = description
-        @client = Aws::CloudWatchEvents::Client.new(option.aws_config)
+        if client != nil
+          @client = client
+        else
+          @client = Aws::CloudWatchEvents::Client.new(option.aws_config)
+        end
       end
 
       def create
