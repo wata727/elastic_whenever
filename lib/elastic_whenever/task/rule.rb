@@ -9,7 +9,8 @@ module ElasticWhenever
       class UnsupportedOptionException < StandardError; end
 
       def self.fetch(option)
-        client = Aws::CloudWatchEvents::Client.new(option.aws_config)
+        client = option.cloudwatch_events_client
+        Logger.instance.message("Fetching Rules for #{option.identifier}")
         client.list_rules(name_prefix: option.identifier).rules.map do |rule|
           self.new(
             option,
@@ -21,12 +22,12 @@ module ElasticWhenever
         end
       end
 
-      def self.convert(option, task)
+      def self.convert(option, expression, command)
         self.new(
           option,
-          name: rule_name(option.identifier, task.expression, task.commands),
-          expression: task.expression,
-          description: rule_description(option.identifier, task.expression, task.commands)
+          name: rule_name(option.identifier, expression, command),
+          expression: expression,
+          description: rule_description(option.identifier, expression, command)
         )
       end
 
@@ -38,12 +39,13 @@ module ElasticWhenever
         if client != nil
           @client = client
         else
-          @client = Aws::CloudWatchEvents::Client.new(option.aws_config)
+          @client = option.cloudwatch_events_client
         end
       end
 
       def create
         # See https://docs.aws.amazon.com/eventbridge/latest/APIReference/API_PutRule.html#API_PutRule_RequestSyntax
+        Logger.instance.message("Creating Rule: #{name} #{expression}")
         client.put_rule(
           name: name,
           schedule_expression: expression,
@@ -53,19 +55,22 @@ module ElasticWhenever
       end
 
       def delete
+        Logger.instance.message("Listing Targets by Rule: #{name}")
         targets = client.list_targets_by_rule(rule: name).targets
+        Logger.instance.message("Removing Targets") unless targets.empty?
         client.remove_targets(rule: name, ids: targets.map(&:id)) unless targets.empty?
+        Logger.instance.message("Removing Rule: #{name}")
         client.delete_rule(name: name)
       end
 
       private
 
-      def self.rule_name(identifier, expression, commands)
-        "#{identifier}_#{Digest::SHA1.hexdigest([expression, commands.map { |command| command.join("-") }.join("-")].join("-"))}"
+      def self.rule_name(identifier, expression, command)
+        "#{identifier}_#{Digest::SHA1.hexdigest([expression, command.join("-")].join("-"))}"
       end
 
-      def self.rule_description(identifier, expression, commands)
-        "#{identifier} - #{expression} - #{commands.map { |command| command.join(" ") }.join(" - ")}"
+      def self.rule_description(identifier, expression, command)
+        "#{identifier} - #{expression} - #{command.join(" ")}"
       end
 
       def truncate(string, max)

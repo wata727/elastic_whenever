@@ -23,6 +23,10 @@ module ElasticWhenever
     attr_reader :schedule_file
     attr_reader :iam_role
     attr_reader :rule_state
+    attr_reader :aws_config
+    attr_reader :ecs_client
+    attr_reader :iam_client
+    attr_reader :cloudwatch_events_client
 
     class InvalidOptionException < StandardError; end
 
@@ -48,7 +52,7 @@ module ElasticWhenever
       @region = nil
 
       OptionParser.new do |opts|
-        opts.on('-i', '--update identifier', 'Clear and create scheduled tasks by schedule file') do |identifier|
+        opts.on('-i', '--update identifier', 'Creates and deletes tasks as needed by schedule file') do |identifier|
           @identifier = identifier
           @mode = UPDATE_MODE
         end
@@ -132,7 +136,19 @@ module ElasticWhenever
     end
 
     def aws_config
-      { credentials: credentials, region: region }.delete_if { |_k, v| v.nil? }
+      @aws_config ||= { credentials: credentials, region: region }.delete_if { |_k, v| v.nil? }
+    end
+
+    def ecs_client
+      @ecs_client ||= Aws::ECS::Client.new(aws_config)
+    end
+
+    def iam_client
+      @iam_client ||= Aws::IAM::Client.new(aws_config)
+    end
+
+    def cloudwatch_events_client
+      @cloudwatch_events_client ||= Aws::CloudWatchEvents::Client.new(aws_config)
     end
 
     def validate!

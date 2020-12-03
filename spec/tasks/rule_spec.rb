@@ -23,10 +23,10 @@ RSpec.describe ElasticWhenever::Task::Rule do
       task.rake "hoge:run"
       task.rake "command:foo"
 
-      expect(ElasticWhenever::Task::Rule.convert(option, task)).to have_attributes(
-                                                                     name: "test_a46a593729246bb4947ee259c46edf2a9a55d8f2",
+      expect(ElasticWhenever::Task::Rule.convert(option, task.expression, task.commands.first)).to have_attributes(
+                                                                     name: "test_9bd25c94ceb04edcaa64946e7ed84f13644d655f",
                                                                      expression: "cron(0 0 * * ? *)",
-                                                                     description: "test - cron(0 0 * * ? *) - bundle exec rake hoge:run --silent - bundle exec rake command:foo --silent"
+                                                                     description: "test - cron(0 0 * * ? *) - bundle exec rake hoge:run --silent"
                                                                    )
     end
   end

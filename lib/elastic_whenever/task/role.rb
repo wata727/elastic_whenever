@@ -2,7 +2,7 @@ module ElasticWhenever
   class Task
     class Role
       def initialize(option)
-        client = Aws::IAM::Client.new(option.aws_config)
+        client = option.iam_client
         @resource = Aws::IAM::Resource.new(client: client)
         @role_name = option.iam_role
         @role = resource.role(@role_name)

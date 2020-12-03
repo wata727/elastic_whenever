@@ -4,7 +4,7 @@ module ElasticWhenever
       class InvalidInputException < StandardError; end
 
       def initialize(option, name)
-        @client = Aws::ECS::Client.new(option.aws_config)
+        @client = option.ecs_client
         @cluster = client.describe_clusters(
           clusters: [name]
         ).clusters.first

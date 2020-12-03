@@ -17,6 +17,7 @@ RSpec.describe ElasticWhenever::CLI do
     let(:cluster) { double(arn: "arn:aws:ecs:us-east-1:123456789:cluster/test", name: "test") }
     let(:definition) { double(arn: "arn:aws:ecs:us-east-1:123456789:task-definition/wordpress:2", name: "wordpress:2", containers: ["testContainer"]) }
     let(:role) { double(arn: "arn:aws:ecs:us-east-1:123456789:role/testRole") }
+    let(:rule) { double(name: "test_9c958bdba560ec9808317b1f8627c242ed36e6a6", description: "test - cron(0 0 * * ? *) - bundle exec bin/rails runner -e production Hoge.run") }
     before do
       allow(ElasticWhenever::Schedule).to receive(:new).with((Pathname(__dir__) + "fixtures/schedule.rb").to_s, boolean, kind_of(Array)).and_return(schedule)
       allow(ElasticWhenever::Task::Cluster).to receive(:new).with(kind_of(ElasticWhenever::Option), "test").and_return(cluster)
@@ -43,7 +44,7 @@ RSpec.describe ElasticWhenever::CLI do
         expect_any_instance_of(ElasticWhenever::Task::Target).not_to receive(:create)
 
         expect {
-          ElasticWhenever::CLI.run(args)
+          ElasticWhenever::CLI.new(args).run
         }.to output(<<~OUTPUT).to_stdout
           cron(0 0 * * ? *) test wordpress:2 testContainer bundle exec bin/rails runner -e production Hoge.run
 
@@ -52,8 +53,8 @@ RSpec.describe ElasticWhenever::CLI do
         OUTPUT
       end
 
-      it "retruns success status code" do
-        expect(ElasticWhenever::CLI.run(args)).to eq ElasticWhenever::CLI::SUCCESS_EXIT_CODE
+      it "returns success status code" do
+        expect(ElasticWhenever::CLI.new(args).run).to eq ElasticWhenever::CLI::SUCCESS_EXIT_CODE
       end
     end
 
@@ -71,24 +72,77 @@ RSpec.describe ElasticWhenever::CLI do
 
       before do
         allow(role).to receive(:create)
-        allow(ElasticWhenever::CLI).to receive(:clear_tasks).with(kind_of(ElasticWhenever::Option))
+
         allow_any_instance_of(ElasticWhenever::Task::Rule).to receive(:create)
         allow_any_instance_of(ElasticWhenever::Task::Target).to receive(:create)
+        allow(ElasticWhenever::Task::Rule).to receive(:fetch).and_return([])
       end
 
-      it "updates tasks and returns success status code" do
-        expect(role).to receive(:create)
-        expect(ElasticWhenever::CLI).to receive(:clear_tasks).with(kind_of(ElasticWhenever::Option))
+      it "creates the missing tasks" do
         expect_any_instance_of(ElasticWhenever::Task::Rule).to receive(:create)
         expect_any_instance_of(ElasticWhenever::Task::Target).to receive(:create)
 
-        expect(ElasticWhenever::CLI.run(args)).to eq ElasticWhenever::CLI::SUCCESS_EXIT_CODE
+        expect(ElasticWhenever::CLI.new(args).run).to eq ElasticWhenever::CLI::SUCCESS_EXIT_CODE
       end
 
       it "receives schedule file name and variables" do
         expect(ElasticWhenever::Schedule).to receive(:new).with((Pathname(__dir__) + "fixtures/schedule.rb").to_s, boolean, [{ key: "environment", value: "staging" }, { key: "foo", value: "bar" }])
 
-        ElasticWhenever::CLI.run(args.concat(%W(--set environment=staging&foo=bar)))
+        ElasticWhenever::CLI.new(args.concat(%W(--set environment=staging&foo=bar))).run
+      end
+
+      context "with an unchanged schedule" do
+        before do
+          expect(ElasticWhenever::Task::Rule).to receive(:fetch).and_return([rule])
+        end
+
+        it "does not create or remove any rules" do
+          expect_any_instance_of(ElasticWhenever::Task::Rule).to_not receive(:create)
+          expect(rule).not_to receive(:delete)
+
+          expect(ElasticWhenever::CLI.new(args).run).to eq ElasticWhenever::CLI::SUCCESS_EXIT_CODE
+        end
+
+        it "does not create or remove any targets" do
+          expect_any_instance_of(ElasticWhenever::Task::Target).to_not receive(:create)
+
+          expect(ElasticWhenever::CLI.new(args).run).to eq ElasticWhenever::CLI::SUCCESS_EXIT_CODE
+        end
+      end
+
+      context "with additions to the schedule" do
+        before do
+          expect(ElasticWhenever::Task::Rule).to receive(:fetch).and_return([])
+        end
+
+        it "creates the new target" do
+          expect_any_instance_of(ElasticWhenever::Task::Target).to receive(:create)
+
+          expect(ElasticWhenever::CLI.new(args).run).to eq ElasticWhenever::CLI::SUCCESS_EXIT_CODE
+        end
+
+        it "creates the new rule" do
+          expect_any_instance_of(ElasticWhenever::Task::Rule).to receive(:create)
+          expect_any_instance_of(ElasticWhenever::Task::Rule).not_to receive(:delete)
+
+          expect(ElasticWhenever::CLI.new(args).run).to eq ElasticWhenever::CLI::SUCCESS_EXIT_CODE
+        end
+      end
+
+      context "with removals from the schedule" do
+        let(:schedule) do
+          double(environment: "production", chronic_options: {}, tasks: [])
+        end
+
+        before do
+          expect(ElasticWhenever::Task::Rule).to receive(:fetch).twice.and_return([rule])
+        end
+
+        it "removes the rules that don't exist in the new schedule" do
+          expect(rule).to receive(:delete)
+
+          expect(ElasticWhenever::CLI.new(args).run).to eq ElasticWhenever::CLI::SUCCESS_EXIT_CODE
+        end
       end
     end
 
@@ -106,18 +160,20 @@ RSpec.describe ElasticWhenever::CLI do
         expect(ElasticWhenever::Task::Rule).to receive(:fetch).with(kind_of(ElasticWhenever::Option)).and_return([rule])
         expect(rule).to receive(:delete)
 
-        expect(ElasticWhenever::CLI.run(args)).to eq ElasticWhenever::CLI::SUCCESS_EXIT_CODE
+        expect(ElasticWhenever::CLI.new(args).run).to eq ElasticWhenever::CLI::SUCCESS_EXIT_CODE
       end
     end
 
     context "with list mode" do
-      let(:rule) { double(expression: "cron(0 0 * * ? *)") }
+      let(:expression) { "cron(0 0 * * ? *)" }
+      let(:rule) { double(expression: expression) }
       let(:target) do
         double(
           cluster: cluster,
           definition: definition,
           container: "testContainer",
-          commands: ["bundle", "exec", "bin/rails", "runner", "-e", "production", "Hoge.run"]
+          commands: ["bundle", "exec", "bin/rails", "runner", "-e", "production", "Hoge.run"],
+          rule: rule,
         )
       end
       let(:args) do
@@ -135,7 +191,7 @@ RSpec.describe ElasticWhenever::CLI do
 
       it "lists tasks" do
         expect {
-          ElasticWhenever::CLI.run(args)
+          ElasticWhenever::CLI.new(args).run
         }.to output(<<~OUTPUT).to_stdout
           cron(0 0 * * ? *) test wordpress:2 testContainer bundle exec bin/rails runner -e production Hoge.run
 
@@ -148,7 +204,7 @@ RSpec.describe ElasticWhenever::CLI do
     context "with print version mode" do
       it "prints version" do
         expect {
-          ElasticWhenever::CLI.run(%w(-v))
+          ElasticWhenever::CLI.new(%w(-v)).run
         }.to output("Elastic Whenever v#{ElasticWhenever::VERSION}\n").to_stdout
       end
     end
