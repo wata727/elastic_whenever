@@ -159,6 +159,25 @@ module ElasticWhenever
       raise InvalidOptionException.new("Invalid rule state. Possible values are #{POSSIBLE_RULE_STATES.join(", ")}") unless POSSIBLE_RULE_STATES.include?(rule_state)
     end
 
+    def key
+      Digest::SHA1.hexdigest(
+        [
+          identifier,
+          variables,
+          cluster,
+          task_definition,
+          container,
+          assign_public_ip,
+          launch_type,
+          platform_version,
+          security_groups,
+          subnets,
+          iam_role,
+          rule_state,
+        ].join
+      )
+    end
+
     private
 
     attr_reader :profile

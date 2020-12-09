@@ -25,7 +25,7 @@ module ElasticWhenever
       def self.convert(option, expression, command)
         self.new(
           option,
-          name: rule_name(option.identifier, expression, command),
+          name: rule_name(option, expression, command),
           expression: expression,
           description: rule_description(option.identifier, expression, command)
         )
@@ -65,8 +65,8 @@ module ElasticWhenever
 
       private
 
-      def self.rule_name(identifier, expression, command)
-        "#{identifier}_#{Digest::SHA1.hexdigest([expression, command.join("-")].join("-"))}"
+      def self.rule_name(option, expression, command)
+        "#{option.identifier}_#{Digest::SHA1.hexdigest([option.key, expression, command.join("-")].join("-"))}"
       end
 
       def self.rule_description(identifier, expression, command)

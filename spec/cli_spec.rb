@@ -17,7 +17,7 @@ RSpec.describe ElasticWhenever::CLI do
     let(:cluster) { double(arn: "arn:aws:ecs:us-east-1:123456789:cluster/test", name: "test") }
     let(:definition) { double(arn: "arn:aws:ecs:us-east-1:123456789:task-definition/wordpress:2", name: "wordpress:2", containers: ["testContainer"]) }
     let(:role) { double(arn: "arn:aws:ecs:us-east-1:123456789:role/testRole") }
-    let(:rule) { double(name: "test_9c958bdba560ec9808317b1f8627c242ed36e6a6", description: "test - cron(0 0 * * ? *) - bundle exec bin/rails runner -e production Hoge.run") }
+    let(:rule) { double(name: "test_2f41f32af2d2a46d5c024f12448894066ae90036", description: "test - cron(0 0 * * ? *) - bundle exec bin/rails runner -e production Hoge.run") }
     before do
       allow(ElasticWhenever::Schedule).to receive(:new).with((Pathname(__dir__) + "fixtures/schedule.rb").to_s, boolean, kind_of(Array)).and_return(schedule)
       allow(ElasticWhenever::Task::Cluster).to receive(:new).with(kind_of(ElasticWhenever::Option), "test").and_return(cluster)
