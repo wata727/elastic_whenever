@@ -6,14 +6,44 @@ RSpec.describe ElasticWhenever::Task::Rule do
   before { allow(Aws::CloudWatchEvents::Client).to receive(:new).and_return(client) }
 
   describe "fetch" do
+    let(:rule_call_1) do
+      double(
+        rules: [
+          double(name: "example0", schedule_expression: "cron(0 0 * * ? *)", description: "test0"),
+          double(name: "example1", schedule_expression: "cron(1 0 * * ? *)", description: "test1")
+        ],
+        next_token: "1",
+      )
+    end
+    let(:rule_call_2) do
+      double(
+        rules: [
+          double(name: "example2", schedule_expression: "cron(2 0 * * ? *)", description: "test2"),
+          double(name: "example3", schedule_expression: "cron(3 0 * * ? *)", description: "test3")
+        ],
+        next_token: "2",
+      )
+    end
+    let(:rule_call_3) do
+      double(
+        rules: [
+          double(name: "example4", schedule_expression: "cron(4 0 * * ? *)", description: "test4"),
+        ],
+        next_token: nil,
+      )
+    end
     before do
-      allow(client).to receive(:list_rules).with(name_prefix: "test").and_return(double(rules: [double(name: "example", schedule_expression: "cron(0 0 * * ? *)", description: "test")]))
+      allow(client).to receive(:list_rules).with(name_prefix: "test", next_token: nil).and_return(rule_call_1)
+      allow(client).to receive(:list_rules).with(name_prefix: "test", next_token: "1").and_return(rule_call_2)
+      allow(client).to receive(:list_rules).with(name_prefix: "test", next_token: "2").and_return(rule_call_3)
     end
 
     it "fetches rule" do
       rules = ElasticWhenever::Task::Rule.fetch(option)
-      expect(rules.count).to eq 1
-      expect(rules.first).to have_attributes(name: "example", expression: "cron(0 0 * * ? *)")
+      expect(rules.count).to eq 5
+      rules.each_with_index do |rule, i|
+        expect(rules[i]).to have_attributes(name: "example#{i}", expression: "cron(#{i} 0 * * ? *)", description: "test#{i}")
+      end
     end
   end
 

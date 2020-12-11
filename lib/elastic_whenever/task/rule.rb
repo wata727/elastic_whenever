@@ -8,17 +8,25 @@ module ElasticWhenever
 
       class UnsupportedOptionException < StandardError; end
 
-      def self.fetch(option)
+      def self.fetch(option, rules: [], next_token: nil)
         client = option.cloudwatch_events_client
-        Logger.instance.message("Fetching Rules for #{option.identifier}")
-        client.list_rules(name_prefix: option.identifier).rules.map do |rule|
-          self.new(
+        prefix = option.identifier
+
+        Logger.instance.message("Fetching Rules for prefix: #{prefix} next_token: #{next_token}")
+        response = client.list_rules(name_prefix: prefix, next_token: next_token)
+        response.rules.each do |rule|
+          rules << self.new(
             option,
             name: rule.name,
             expression: rule.schedule_expression,
             description: rule.description,
             client: client
           )
+        end
+        if response.next_token.nil?
+          rules
+        else
+          fetch(option, rules: rules, next_token: response.next_token)
         end
       end
 
