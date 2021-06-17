@@ -23,6 +23,7 @@ module ElasticWhenever
     attr_reader :schedule_file
     attr_reader :iam_role
     attr_reader :rule_state
+    attr_reader :state_machine_arn
 
     class InvalidOptionException < StandardError; end
 
@@ -115,6 +116,9 @@ module ElasticWhenever
         end
         opts.on('--region region', 'AWS region') do |region|
           @region = region
+        end
+        opts.on('--state-machine-arn state_machine_arn', 'Use StepFunction StepMachine.') do |state_machine_arn|
+          @state_machine_arn = state_machine_arn
         end
         opts.on('-v', '--version', 'Print version') do
           @mode = PRINT_VERSION_MODE

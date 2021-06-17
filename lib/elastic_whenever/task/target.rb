@@ -47,22 +47,37 @@ module ElasticWhenever
         @platform_version = option.platform_version
         @security_groups = option.security_groups
         @subnets = option.subnets
+        @state_machine_arn = option.state_machine_arn
         @client = Aws::CloudWatchEvents::Client.new(option.aws_config)
       end
 
       def create
-        client.put_targets(
-          rule: rule.name,
-          targets: [
-            {
-              id: Digest::SHA1.hexdigest(commands.join("-")),
-              arn: cluster.arn,
-              input: input_json(container, commands),
-              role_arn: role.arn,
-              ecs_parameters: ecs_parameters,
-            }
-          ]
-        )
+        if @state_machine_arn
+          client.put_targets(
+            rule: rule.name,
+            targets: [
+              {
+                id: Digest::SHA1.hexdigest(commands.join("-")),
+                arn: @state_machine_arn,
+                input: { "task-def": definition.arn, commands: commands }.to_json,
+                role_arn: role.arn,
+              }
+            ]
+          )
+        else
+          client.put_targets(
+            rule: rule.name,
+            targets: [
+              {
+                id: Digest::SHA1.hexdigest(commands.join("-")),
+                arn: cluster.arn,
+                input: input_json(container, commands),
+                role_arn: role.arn,
+                ecs_parameters: ecs_parameters,
+              }
+            ]
+          )
+        end
       end
 
       private
