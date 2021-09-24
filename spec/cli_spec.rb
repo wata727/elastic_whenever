@@ -91,6 +91,19 @@ RSpec.describe ElasticWhenever::CLI do
         ElasticWhenever::CLI.new(args.concat(%W(--set environment=staging&foo=bar))).run
       end
 
+      it "creates the role if it doesn't exist" do
+        expect(role).to receive(:create)
+
+        expect(ElasticWhenever::CLI.new(args).run).to eq ElasticWhenever::CLI::SUCCESS_EXIT_CODE
+      end
+
+      it "does not create the role if it exists" do
+        allow(role).to receive(:exists?).and_return(true)
+        expect(role).not_to receive(:create)
+
+        expect(ElasticWhenever::CLI.new(args).run).to eq ElasticWhenever::CLI::SUCCESS_EXIT_CODE
+      end
+
       context "with an unchanged schedule" do
         before do
           expect(ElasticWhenever::Task::Rule).to receive(:fetch).and_return([rule])

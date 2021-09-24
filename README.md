@@ -86,12 +86,13 @@ end
 Especially, `@environment` defaults to `"production"`.
 
 ## How it works
-Elastic Whenever creates CloudWatch Events as many as `every` block. Each event has as many targets as there are commands in the block.
+Elastic Whenever creates CloudWatch Events for every command. Each rule has a one to one mapping to a target.
+for example, the following input will generate two Rules each with one Target.
 
 ```ruby
-every '0 0 * * *' do # scheduled task (identifier_68237a3b152a6c44359e1cf5cd8e7cf0def303d7)
-  rake "hoge:run"    # target for `identifier_68237a3b152a6c44359e1cf5cd8e7cf0def303d7`
-  command "awesome"  # target for `identifier_68237a3b152a6c44359e1cf5cd8e7cf0def303d7`
+every '0 0 * * *' do
+  rake "hoge:run"
+  command "awesome"
 end
 ```
 

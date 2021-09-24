@@ -16,7 +16,6 @@ module ElasticWhenever
 
       def self.fetch(option, rule)
         client = option.cloudwatch_events_client
-        Logger.instance.message("Fetching Targets for: #{rule.name}")
         targets = client.list_targets_by_rule(rule: rule.name).targets
         targets.map do |target|
           input = JSON.parse(target.input, symbolize_names: true)
@@ -53,7 +52,6 @@ module ElasticWhenever
       end
 
       def create
-        Logger.instance.message("Creating Target: #{rule.name}")
         client.put_targets(
           rule: rule.name,
           targets: [
