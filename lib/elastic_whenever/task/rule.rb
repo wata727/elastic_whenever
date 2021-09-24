@@ -12,7 +12,6 @@ module ElasticWhenever
         client = option.cloudwatch_events_client
         prefix = option.identifier
 
-        Logger.instance.message("Fetching Rules for prefix: #{prefix} next_token: #{next_token}")
         response = client.list_rules(name_prefix: prefix, next_token: next_token)
         response.rules.each do |rule|
           rules << self.new(
@@ -63,9 +62,7 @@ module ElasticWhenever
       end
 
       def delete
-        Logger.instance.message("Listing Targets by Rule: #{name}")
         targets = client.list_targets_by_rule(rule: name).targets
-        Logger.instance.message("Removing Targets") unless targets.empty?
         client.remove_targets(rule: name, ids: targets.map(&:id)) unless targets.empty?
         Logger.instance.message("Removing Rule: #{name}")
         client.delete_rule(name: name)

@@ -51,7 +51,6 @@ RSpec.describe ElasticWhenever::Task::Rule do
     it "converts scheduled task syntax" do
       task = ElasticWhenever::Task.new("production", false, "bundle exec", "cron(0 0 * * ? *)")
       task.rake "hoge:run"
-      task.rake "command:foo"
 
       expect(ElasticWhenever::Task::Rule.convert(option, task.expression, task.commands.first)).to have_attributes(
                                                                      name: "test_6a6abf21a362cde702bd39f4679704598fad7ead",

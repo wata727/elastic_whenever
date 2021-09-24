@@ -41,7 +41,7 @@ module ElasticWhenever
       Logger.instance.fail("missing region error occurred; please use `--region` option or export `AWS_REGION` environment variable.")
       ERROR_EXIT_CODE
     rescue Aws::Errors::MissingCredentialsError => e
-      Logger.instance.fail("missing credential error occurred; please specify it with arguments, use shared credentials, or export `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variable. #{e.backtrace}")
+      Logger.instance.fail("missing credential error occurred; please specify it with arguments, use shared credentials, or export `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variable")
       ERROR_EXIT_CODE
     rescue OptionParser::MissingArgument,
       Option::InvalidOptionException,
