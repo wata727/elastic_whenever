@@ -1,3 +1,20 @@
+## v0.7.0 (2021-09-25)
+
+This release contains a major change to the behavior when updating tasks. In most cases, this change has no effect, but be aware of the change in behavior when omitting a revision of the task definition. In particular, if you are building a deployment workflow where the update timing of task definitions and the update timing of scheduled tasks are different, the revisions that are executed may be different.
+
+### Breaking Changes
+
+- [#57](https://github.com/wata727/elastic_whenever/pull/57): Selective Updates ([@HistoireDeBabar](https://github.com/HistoireDeBabar))
+  - Previously, Elastic Whenever recreates all scheduled tasks after deleting all tasks when updating tasks. However, in this case, there is a risk that frequently invoked tasks will not be executed, so this change now creates/deletes only those tasks that have changed.
+  - Due to this change, the naming convention for scheduled tasks has changed. When updating from v0.6, all rules will be deleted and recreated due to different naming conventions, and the behavior will be the same as before. After that, the task will not change if the names are the same.
+  - The breaking change is that the behavior when omitting a revision of a task definition has changed. Previously, when you created a task, you resolved the latest revision at that time, so even if the task definition was updated, the revision that was executed was always the same. In v0.7 and later, revisions are not resolved when you created a task, so the latest revision is always adopted.
+
+### Chores
+
+- [#55](https://github.com/wata727/elastic_whenever/pull/55): CI against Ruby 3.0
+- [#56](https://github.com/wata727/elastic_whenever/pull/56): Add the rexml dependency explictly
+- [#58](https://github.com/wata727/elastic_whenever/pull/58): Fix typo
+
 ## v0.6.1 (2020-11-08)
 
 ### BugFixes
