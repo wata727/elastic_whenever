@@ -8,10 +8,13 @@ module ElasticWhenever
 
       class UnsupportedOptionException < StandardError; end
 
-      def self.fetch(option)
-        client = Aws::CloudWatchEvents::Client.new(option.aws_config)
-        client.list_rules(name_prefix: option.identifier).rules.map do |rule|
-          self.new(
+      def self.fetch(option, rules: [], next_token: nil)
+        client = option.cloudwatch_events_client
+        prefix = option.identifier
+
+        response = client.list_rules(name_prefix: prefix, next_token: next_token)
+        response.rules.each do |rule|
+          rules << self.new(
             option,
             name: rule.name,
             expression: rule.schedule_expression,
@@ -19,14 +22,19 @@ module ElasticWhenever
             client: client
           )
         end
+        if response.next_token.nil?
+          rules
+        else
+          fetch(option, rules: rules, next_token: response.next_token)
+        end
       end
 
-      def self.convert(option, task)
+      def self.convert(option, expression, command)
         self.new(
           option,
-          name: rule_name(option.identifier, task.expression, task.commands),
-          expression: task.expression,
-          description: rule_description(option.identifier, task.expression, task.commands)
+          name: rule_name(option, expression, command),
+          expression: expression,
+          description: rule_description(option.identifier, expression, command)
         )
       end
 
@@ -38,12 +46,13 @@ module ElasticWhenever
         if client != nil
           @client = client
         else
-          @client = Aws::CloudWatchEvents::Client.new(option.aws_config)
+          @client = option.cloudwatch_events_client
         end
       end
 
       def create
         # See https://docs.aws.amazon.com/eventbridge/latest/APIReference/API_PutRule.html#API_PutRule_RequestSyntax
+        Logger.instance.message("Creating Rule: #{name} #{expression}")
         client.put_rule(
           name: name,
           schedule_expression: expression,
@@ -55,17 +64,18 @@ module ElasticWhenever
       def delete
         targets = client.list_targets_by_rule(rule: name).targets
         client.remove_targets(rule: name, ids: targets.map(&:id)) unless targets.empty?
+        Logger.instance.message("Removing Rule: #{name}")
         client.delete_rule(name: name)
       end
 
       private
 
-      def self.rule_name(identifier, expression, commands)
-        "#{identifier}_#{Digest::SHA1.hexdigest([expression, commands.map { |command| command.join("-") }.join("-")].join("-"))}"
+      def self.rule_name(option, expression, command)
+        "#{option.identifier}_#{Digest::SHA1.hexdigest([option.key, expression, command.join("-")].join("-"))}"
       end
 
-      def self.rule_description(identifier, expression, commands)
-        "#{identifier} - #{expression} - #{commands.map { |command| command.join(" ") }.join(" - ")}"
+      def self.rule_description(identifier, expression, command)
+        "#{identifier} - #{expression} - #{command.join(" ")}"
       end
 
       def truncate(string, max)

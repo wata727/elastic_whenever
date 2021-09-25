@@ -41,7 +41,7 @@ RSpec.describe ElasticWhenever::Task::Target do
             ]
           }.to_json,
           arn: "arn:aws:ecs:us-east-1:123456789:cluster/test",
-          ecs_parameters: double(task_definition_arn: "arn:aws:ecs:us-east-1:123456789:task-definition/wordpress:2")
+          ecs_parameters: double(task_definition_arn: "arn:aws:ecs:us-east-1:123456789:task-definition/wordpress:2"),
         )
       ]
     end

@@ -10,11 +10,12 @@ module ElasticWhenever
       attr_reader :platform_version
       attr_reader :security_groups
       attr_reader :subnets
+      attr_reader :rule
 
       class InvalidContainerException < StandardError; end
 
       def self.fetch(option, rule)
-        client = Aws::CloudWatchEvents::Client.new(option.aws_config)
+        client = option.cloudwatch_events_client
         targets = client.list_targets_by_rule(rule: rule.name).targets
         targets.map do |target|
           input = JSON.parse(target.input, symbolize_names: true)
@@ -26,7 +27,7 @@ module ElasticWhenever
             container: input[:containerOverrides].first[:name],
             commands: input[:containerOverrides].first[:command],
             rule: rule,
-            role: Role.new(option)
+            role: Role.new(option),
           )
         end
       end
@@ -47,7 +48,7 @@ module ElasticWhenever
         @platform_version = option.platform_version
         @security_groups = option.security_groups
         @subnets = option.subnets
-        @client = Aws::CloudWatchEvents::Client.new(option.aws_config)
+        @client = option.cloudwatch_events_client
       end
 
       def create
@@ -102,7 +103,6 @@ module ElasticWhenever
         end
       end
 
-      attr_reader :rule
       attr_reader :role
       attr_reader :client
     end

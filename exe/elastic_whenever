@@ -2,4 +2,4 @@
 
 require "elastic_whenever"
 
-exit ElasticWhenever::CLI.run(ARGV)
+exit ElasticWhenever::CLI.new(ARGV).run

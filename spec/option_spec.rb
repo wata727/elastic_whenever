@@ -119,43 +119,43 @@ RSpec.describe ElasticWhenever::Option do
 
   describe "#validate!" do
     it "raise exception when schedule file is not found" do
-      expect { 
+      expect {
         ElasticWhenever::Option.new(%W(
           -f invalid/file.rb
           --cluster test
           --task-definition wordpress:2
           --container testContainer
-        )).validate! 
+        )).validate!
       }.to raise_error(ElasticWhenever::Option::InvalidOptionException, "Can't find file: invalid/file.rb")
     end
 
     it "raise exception when cluster is undefined" do
-      expect { 
+      expect {
         ElasticWhenever::Option.new(%W(
           -f #{Pathname(__dir__) + "fixtures/schedule.rb"}
           --task-definition wordpress:2
           --container testContainer
-        )).validate! 
+        )).validate!
       }.to raise_error(ElasticWhenever::Option::InvalidOptionException, "You must set cluster")
     end
 
     it "raise exception when task definition is undefined" do
-      expect { 
+      expect {
         ElasticWhenever::Option.new(%W(
           -f #{Pathname(__dir__) + "fixtures/schedule.rb"}
           --cluster test
           --container testContainer
-        )).validate! 
+        )).validate!
       }.to raise_error(ElasticWhenever::Option::InvalidOptionException, "You must set task definition")
     end
 
     it "raise exception when container is undefined" do
-      expect { 
+      expect {
         ElasticWhenever::Option.new(%W(
           -f #{Pathname(__dir__) + "fixtures/schedule.rb"}
           --cluster test
           --task-definition wordpress:2
-        )).validate! 
+        )).validate!
       }.to raise_error(ElasticWhenever::Option::InvalidOptionException, "You must set container")
     end
 
@@ -178,6 +178,47 @@ RSpec.describe ElasticWhenever::Option do
           --task-definition wordpress:2
           --container testContainer
       )).validate!
+    end
+  end
+
+  describe "#key" do
+    let(:configuration) { %w(
+      --set environment=staging&foo=bar
+      --cluster testCluster
+      --task-definition wordpress:2
+      --container testContainer
+      --launch_type FARGATE
+      --assign-public-ip
+      --security-groups sg-2c503655,sg-72f0cb0a
+      --subnets subnet-4973d63f,subnet-45827d1d
+      --iam-role schedule-test
+      --platform-version 1.1.0
+      --rule_state DISABLED
+      -i testId).freeze
+    }
+
+    it "creates a unique key for configuration options" do
+      options = [
+        configuration,
+        replace_item(configuration, "environment=staging&foo=bar", "environment=test&baz=qux"),
+        replace_item(configuration, "testCluster", "testCluster1"),
+        replace_item(configuration, "testContainer", "testContainer2"),
+        replace_item(configuration, "FARGATE", "EC2"),
+        replace_item(configuration, "--assign-public-ip", ""),
+        replace_item(configuration, "sg-2c503655,sg-72f0cb0a", "sg-2c503645,sg-72f0cbas"),
+        replace_item(configuration, "subnet-4973d63f,subnet-45827d1d", "subnet-12345f,subnet-647382d"),
+        replace_item(configuration, "schedule-test", "new-schedule-test"),
+        replace_item(configuration, "1.1.0", "1.2.0"),
+        replace_item(configuration, "DISABLED", "ENABLED"),
+        replace_item(configuration, "testId", "testId2"),
+      ].map { |conf| ElasticWhenever::Option.new(conf).key }
+
+      expect(options.uniq).to eql(options)
+      expect(options.uniq.length).to eql(12)
+    end
+
+    def replace_item(configuration, old_value, replacement_value)
+      configuration.map { |val| val == old_value ? replacement_value : val }
     end
   end
 end
