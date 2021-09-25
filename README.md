@@ -100,7 +100,7 @@ The scheduled task's name is a digest value calculated from an identifier, comma
 
 NOTE: You should not use the same identifier across different clusters because CloudWatch Events rule names are unique across all clusters.
 
-## Compatible with Whenever
+## Compatibility with Whenever
 ### `job_type`
 Whenever supports custom job type with `job_type` method, but Elastic Whenever doesn't support it.
 
