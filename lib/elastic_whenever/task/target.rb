@@ -59,7 +59,8 @@ module ElasticWhenever
               {
                 id: Digest::SHA1.hexdigest(commands.join("-")),
                 arn: @state_machine_arn,
-                input: { "task-def": definition.arn, commands: commands }.to_json,
+                # revision番号を取り除く
+                input: { "task-def": definition.arn.gsub(/:\d+$/, ''), commands: commands }.to_json,
                 role_arn: role.arn,
               }
             ]
