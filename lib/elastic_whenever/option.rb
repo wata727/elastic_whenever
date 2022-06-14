@@ -84,7 +84,7 @@ module ElasticWhenever
         opts.on('--container container', 'Container name defined in the task definition') do |container|
           @container = container
         end
-        opts.on('--launch-type launch_type', 'Launch type. EC2 or FARGATE. Defualt: EC2') do |launch_type|
+        opts.on('--launch-type launch_type', 'Launch type. EC2 or FARGATE. Default: EC2') do |launch_type|
           @launch_type = launch_type
         end
         opts.on('--assign-public-ip', 'Assign a public IP. Default: DISABLED (FARGATE only)') do

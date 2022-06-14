@@ -36,7 +36,7 @@ Usage: elastic_whenever [options]
         --task-definition task_definition
                                      Task definition name, If omit a revision, use the latest revision of the family automatically. Example: --task-deifinition oneoff-application:2
         --container container        Container name defined in the task definition
-        --launch-type launch_type    Launch type. EC2 or FARGATE. Defualt: EC2
+        --launch-type launch_type    Launch type. EC2 or FARGATE. Default: EC2
         --assign-public-ip           Assign a public IP. Default: DISABLED (FARGATE only)
         --security-groups groups     Example: --security-groups 'sg-2c503655,sg-72f0cb0a' (FARGATE only)
         --subnets subnets            Example: --subnets 'subnet-4973d63f,subnet-45827d1d' (FARGATE only)
