@@ -34,7 +34,7 @@ Usage: elastic_whenever [options]
     -s, --set variables              Example: --set 'environment=staging'
         --cluster cluster            ECS cluster to run tasks
         --task-definition task_definition
-                                     Task definition name, If omit a revision, use the latest revision of the family automatically. Example: --task-deifinition oneoff-application:2
+                                     Task definition name, If omit a revision, use the latest revision of the family automatically. Example: --task-definition oneoff-application:2
         --container container        Container name defined in the task definition
         --launch-type launch_type    Launch type. EC2 or FARGATE. Default: EC2
         --assign-public-ip           Assign a public IP. Default: DISABLED (FARGATE only)

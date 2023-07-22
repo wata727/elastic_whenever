@@ -78,7 +78,7 @@ module ElasticWhenever
         opts.on('--cluster cluster', 'ECS cluster to run tasks') do |cluster|
           @cluster = cluster
         end
-        opts.on('--task-definition task_definition', 'Task definition name, If omit a revision, use the latest revision of the family automatically. Example: --task-deifinition oneoff-application:2') do |definition|
+        opts.on('--task-definition task_definition', 'Task definition name, If omit a revision, use the latest revision of the family automatically. Example: --task-definition oneoff-application:2') do |definition|
           @task_definition = definition
         end
         opts.on('--container container', 'Container name defined in the task definition') do |container|
