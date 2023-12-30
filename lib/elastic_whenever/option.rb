@@ -133,10 +133,11 @@ module ElasticWhenever
                      elsif access_key && secret_key
                        Aws::Credentials.new(access_key, secret_key)
                      end
+      @credentials = nil unless @credentials.set?
     end
 
     def aws_config
-      @aws_config ||= { credentials: credentials, region: region }.delete_if { |_k, v| v.nil? }
+      @aws_config ||= { credentials: credentials, region: region, profile: profile }.delete_if { |_k, v| v.nil? }
     end
 
     def ecs_client
