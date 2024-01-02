@@ -29,5 +29,4 @@ Gem::Specification.new do |spec|
   spec.add_dependency "aws-sdk-iam", "~> 1.0"
   spec.add_dependency "chronic", "~> 0.10"
   spec.add_dependency "retryable", "~> 3.0"
-  spec.add_dependency "rexml", ">= 0"
 end
