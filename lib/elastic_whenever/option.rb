@@ -133,7 +133,7 @@ module ElasticWhenever
                      elsif access_key && secret_key
                        Aws::Credentials.new(access_key, secret_key)
                      end
-      @credentials = nil unless @credentials.set?
+      @credentials = nil unless @credentials&.set?
     end
 
     def aws_config
