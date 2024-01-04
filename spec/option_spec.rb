@@ -98,6 +98,8 @@ RSpec.describe ElasticWhenever::Option do
     before do
       allow(Aws::SharedCredentials).to receive(:new).with(profile_name: "my-account").and_return(shared_credentials)
       allow(Aws::Credentials).to receive(:new).with("secret", "supersecret").and_return(static_credentials)
+      allow(static_credentials).to receive(:set?).and_return(true)
+      allow(shared_credentials).to receive(:set?).and_return(true)
     end
 
     it "has no credentials" do
@@ -114,6 +116,17 @@ RSpec.describe ElasticWhenever::Option do
 
     it "has credentials with region" do
       expect(ElasticWhenever::Option.new(%w(--profile my-account --region us-east-1)).aws_config).to eq(credentials: shared_credentials, region: "us-east-1")
+    end
+
+    context 'SSO' do
+      before do
+        allow(shared_credentials).to receive(:set?).and_return(false)
+      end
+
+      it "has a profile but no valid credentials" do
+        allow(shared_credentials).to receive(:set?).and_return(false)
+        expect(ElasticWhenever::Option.new(%w(--profile my-account)).aws_config).to eq({profile: 'my-account'})
+      end
     end
   end
 
