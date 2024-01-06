@@ -128,12 +128,9 @@ module ElasticWhenever
         end
       end.parse(args)
 
-      @credentials = if profile
-                       Aws::SharedCredentials.new(profile_name: profile)
-                     elsif access_key && secret_key
+      @credentials = if access_key && secret_key
                        Aws::Credentials.new(access_key, secret_key)
                      end
-      @credentials = nil unless @credentials&.set?
     end
 
     def aws_config

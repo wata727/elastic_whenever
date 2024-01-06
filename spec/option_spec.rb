@@ -92,40 +92,31 @@ RSpec.describe ElasticWhenever::Option do
   end
 
   describe "#aws_config" do
-    let(:shared_credentials) { double("Shared Credentials") }
-    let(:static_credentials) { double("Static Credentials") }
-
-    before do
-      allow(Aws::SharedCredentials).to receive(:new).with(profile_name: "my-account").and_return(shared_credentials)
-      allow(Aws::Credentials).to receive(:new).with("secret", "supersecret").and_return(static_credentials)
-      allow(static_credentials).to receive(:set?).and_return(true)
-      allow(shared_credentials).to receive(:set?).and_return(true)
-    end
-
     it "has no credentials" do
       expect(ElasticWhenever::Option.new(nil).aws_config).to eq({})
     end
 
-    it "has shared credentials" do
-      expect(ElasticWhenever::Option.new(%w(--profile my-account)).aws_config).to eq(credentials: shared_credentials)
+    it "has a profile" do
+      expect(ElasticWhenever::Option.new(%w(--profile my-account)).aws_config).to eq({profile: 'my-account'})
     end
 
-    it "has static credentials" do
-      expect(ElasticWhenever::Option.new(%w(--access-key secret --secret-key supersecret)).aws_config).to eq(credentials: static_credentials)
+    it "has a region" do
+      expect(ElasticWhenever::Option.new(%w(--region=us-east-1)).aws_config).to eq({region: 'us-east-1'})
     end
 
-    it "has credentials with region" do
-      expect(ElasticWhenever::Option.new(%w(--profile my-account --region us-east-1)).aws_config).to eq(credentials: shared_credentials, region: "us-east-1")
-    end
+    context 'static credentials' do
+      let(:static_credentials) { double("Static Credentials") }
 
-    context 'SSO' do
       before do
-        allow(shared_credentials).to receive(:set?).and_return(false)
+        allow(Aws::Credentials).to receive(:new).with("secret", "supersecret").and_return(static_credentials)
       end
 
-      it "has a profile but no valid credentials" do
-        allow(shared_credentials).to receive(:set?).and_return(false)
-        expect(ElasticWhenever::Option.new(%w(--profile my-account)).aws_config).to eq({profile: 'my-account'})
+      it "has credentials" do
+        expect(ElasticWhenever::Option.new(%w(--access-key secret --secret-key supersecret)).aws_config).to eq(credentials: static_credentials)
+      end
+
+      it "has a region" do
+        expect(ElasticWhenever::Option.new(%w(--access-key secret --secret-key supersecret --region=us-east-1)).aws_config).to eq({credentials: static_credentials, region: 'us-east-1'})
       end
     end
   end
