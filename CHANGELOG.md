@@ -1,3 +1,19 @@
+## v1.0.0 (2024-01-07)
+
+Although this is a major version release, there are no notable incompatibilities. This means that the current behavior is stable enough that no major future changes are planned at this time.
+
+### Enhancements
+
+- [#69](https://github.com/wata727/elastic_whenever/pull/69): Improve profile support ([@mfittko](https://github.com/mfittko))
+  - Previously, a profile passed with the `--profile` flag was always used only for shared credentials, and could not be used to switch profiles for credentials issued by IAM Identity Center, etc.
+  - With this change, the passed profile will be used correctly to other credentials as well.
+
+### Chores
+
+- [#60](https://github.com/wata727/elastic_whenever/pull/60) [#64](https://github.com/wata727/elastic_whenever/pull/64) [#68](https://github.com/wata727/elastic_whenever/pull/68): CI against Ruby 3.1, 3.2, 3.3
+- [#62](https://github.com/wata727/elastic_whenever/pull/62): fix small typo ([@kijimaD](https://github.com/kijimaD))
+- [#65](https://github.com/wata727/elastic_whenever/pull/65): fix/typos-documentation ([@jotolo](https://github.com/jotolo))
+
 ## v0.7.0 (2021-09-25)
 
 This release contains a major change to the behavior when updating tasks. In most cases, this change has no effect, but be aware of the change in behavior when omitting a revision of the task definition. In particular, if you are building a deployment workflow where the update timing of task definitions and the update timing of scheduled tasks are different, the revisions that are executed may be different.
