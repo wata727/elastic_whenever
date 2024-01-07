@@ -134,7 +134,7 @@ module ElasticWhenever
     end
 
     def aws_config
-      @aws_config ||= { credentials: credentials, region: region, profile: @credentials ? nil : profile }.delete_if { |_k, v| v.nil? }
+      @aws_config ||= { credentials: credentials, region: region, profile: profile }.delete_if { |_k, v| v.nil? }
     end
 
     def ecs_client
