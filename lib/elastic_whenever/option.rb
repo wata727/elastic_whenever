@@ -128,15 +128,13 @@ module ElasticWhenever
         end
       end.parse(args)
 
-      @credentials = if profile
-                       Aws::SharedCredentials.new(profile_name: profile)
-                     elsif access_key && secret_key
+      @credentials = if access_key && secret_key
                        Aws::Credentials.new(access_key, secret_key)
                      end
     end
 
     def aws_config
-      @aws_config ||= { credentials: credentials, region: region }.delete_if { |_k, v| v.nil? }
+      @aws_config ||= { credentials: credentials, region: region, profile: profile }.delete_if { |_k, v| v.nil? }
     end
 
     def ecs_client
