@@ -136,7 +136,7 @@ module ElasticWhenever
         day.gsub!("*", "?") if week != "?"
         # cron syntax:          sunday -> 0
         # scheduled expression: sunday -> 1
-        week.gsub!(/(\d)/) { (Integer($1) + 1) % 7 }
+        week.gsub!(/(\d)/) { Integer($1) + 1 }
         year = year || "*"
         "cron(#{min} #{hour} #{day} #{mon} #{week} #{year})"
       # schedule expression syntax
