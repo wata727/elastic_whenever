@@ -1,3 +1,9 @@
+## v1.0.1 (2024-01-27)
+
+### Bug Fixes
+
+- [#70](https://github.com/wata727/elastic_whenever/pull/70): Fix week converion issue in cron syntax
+
 ## v1.0.0 (2024-01-07)
 
 Although this is a major version release, there are no notable incompatibilities. This means that the current behavior is stable enough that no major future changes are planned at this time.
