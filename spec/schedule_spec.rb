@@ -290,7 +290,7 @@ RSpec.describe ElasticWhenever::Schedule do
     end
 
     it "converts from cron syntax specified week" do
-      expect(schedule.schedule_expression("0 0 * * 0", {})).to eq "cron(0 0 ? * 1 *)"
+      expect(schedule.schedule_expression("0 0 * * 0,1,2,3,4,5,6", {})).to eq "cron(0 0 ? * 1,2,3,4,5,6,7 *)"
     end
 
     it "converts from day shortcuts" do
